@@ -62,17 +62,17 @@ const S = (id, titulo, extra = {}) => ({ id, titulo, blocos: true, ...extra })
 
 const observacoes = [1, 2, 3].map(n => S(
   'observacao-' + n, 'Relato de Observação ' + n,
-  { campos: CAMPOS_OBSERVACAO, pai: 'observacoes', ordem: n }
+  { campos: CAMPOS_OBSERVACAO, pai: 'observacoes', ordem: n, rotulo: 'Relato de observação' }
 ))
 
 const planos = [1, 2, 3, 4, 5, 6, 7].map(n => S(
   'plano-' + n, 'Plano de Aula ' + n,
-  { campos: CAMPOS_PLANO, partes: PARTES_PLANO, pai: 'planos', ordem: n }
+  { campos: CAMPOS_PLANO, partes: PARTES_PLANO, pai: 'planos', ordem: n, rotulo: 'Plano de aula' }
 ))
 
 const relatos = [1, 2, 3, 4, 5, 6, 7].map(n => S(
   'relato-' + n, 'Relato de Aula ' + n,
-  { campos: CAMPOS_RELATO_AULA, pai: 'relatos', ordem: n }
+  { campos: CAMPOS_RELATO_AULA, pai: 'relatos', ordem: n, rotulo: 'Relato de aula' }
 ))
 
 window.SECOES = [
@@ -81,15 +81,15 @@ window.SECOES = [
 
   S('biografia', 'Biografia', { menu: true }),
 
-  S('escola', 'Dados da Escola', { menu: true, campos: CAMPOS_ESCOLA }),
+  S('escola', 'Dados da Escola', { menu: true, menuTitulo: 'A Escola', campos: CAMPOS_ESCOLA }),
 
-  S('observacoes', 'Relatos de Observação', { menu: true, filhos: observacoes }),
+  S('observacoes', 'Relatos de Observação', { menu: true, menuTitulo: 'Observações', filhos: observacoes }),
   ...observacoes,
 
   S('planos', 'Planos de Aula', { menu: true, filhos: planos }),
   ...planos,
 
-  S('relatos', 'Relatos das Aulas', { menu: true, filhos: relatos }),
+  S('relatos', 'Relatos das Aulas', { menu: true, menuTitulo: 'Relatos de Aula', filhos: relatos }),
   ...relatos,
 
   S('consideracoes', 'Minhas Considerações e Observações', { menu: true, menuTitulo: 'Considerações' }),

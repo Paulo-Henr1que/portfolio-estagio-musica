@@ -88,6 +88,22 @@ const renderBlocos = (lista) =>
   (lista || []).map(renderBloco).join('') || ''
 
 // ── Pedaços reaproveitados ─────────────────────────────────────────
+// ── Índice ─────────────────────────────────────────────────────────
+// Lista enumerada em linhas, no lugar de uma grade de cartões: com
+// textos de tamanhos diferentes, a grade deixa buracos brancos; a lista
+// não. A marca de ensaio já diz o número, então o nome não o repete.
+function indice (itens) {
+  return `<ol class="indice">` + itens.map(i => `
+    <li><a href="#/${i.id}">
+      <span class="marca">${String(i.n).padStart(2, '0')}</span>
+      <span class="txt">
+        <b>${esc(i.nome)}</b>
+        ${i.meta ? `<em>${esc(i.meta)}</em>` : ''}
+      </span>
+      <span class="res${i.pendente ? ' pendente' : ''}">${i.pendente ? 'a preencher' : esc(i.res || '')}</span>
+    </a></li>`).join('') + `</ol>`
+}
+
 function renderCampos (defs, valores) {
   // titulo e numero já aparecem no H1 e na trilha; não se repetem nas fichas
   const ocultos = ['titulo', 'numero']
@@ -123,15 +139,12 @@ function vazioAviso (o) {
 function pagInicio (s) {
   const d = dados('inicio')
   const campos = s.campos.map(([k, rot]) => `
-    <div><dt>${esc(rot)}</dt>
+    <div><dt>${esc(rot)}</dt><span class="pont"></span>
     <dd class="${vazio(d[k]) ? 'vazio' : ''}">${vazio(d[k]) ? 'a preencher' : esc(d[k])}</dd></div>`).join('')
 
-  const atalhos = window.SECOES.filter(x => x.menu && x.id !== 'inicio').map((x, i) => `
-    <a class="atalho" href="#/${x.id}">
-      <span class="n">${String(i + 1).padStart(2, '0')}</span>
-      <strong>${esc(x.titulo)}</strong>
-      <span class="res">${esc(resumoSecao(x))}</span>
-    </a>`).join('')
+  const atalhos = indice(window.SECOES
+    .filter(x => x.menu && x.id !== 'inicio')
+    .map((x, i) => ({ id: x.id, n: i + 1, nome: x.titulo, res: resumoSecao(x) })))
 
   return `
   <section class="capa">
@@ -224,7 +237,7 @@ function pagInicio (s) {
       ${renderDocumentos(d.documentos)}
 
       <h3 class="sub">Seções do portfólio</h3>
-      <div class="grade">${atalhos}</div>
+      ${atalhos}
     </div>
   </div>`
 }
@@ -244,18 +257,18 @@ function resumoSecao (s) {
 
 function pagIndice (s) {
   const d = dados(s.id)
-  const cartoes = s.filhos.map(f => {
+  // O nome não repete o número: a marca de ensaio já o traz.
+  const cartoes = indice(s.filhos.map(f => {
     const fd = dados(f.id)
-    const meta = [fd.data, fd.turma, fd.tema].filter(x => !vazio(x)).join(' · ')
-    const titulo = vazio(fd.titulo) ? f.titulo : fd.titulo
-    return `
-    <a class="atalho" href="#/${f.id}">
-      <span class="n">${String(f.ordem).padStart(2, '0')}</span>
-      <strong>${esc(titulo)}</strong>
-      ${meta ? `<span class="meta">${esc(meta)}</span>` : ''}
-      <span class="res">${esc(fd.resumo || '')}</span>
-    </a>`
-  }).join('')
+    return {
+      id: f.id,
+      n: f.ordem,
+      nome: vazio(fd.titulo) ? (f.rotulo || f.titulo) : fd.titulo,
+      meta: [fd.data, fd.turma, fd.tema].filter(x => !vazio(x)).join(' · '),
+      res: fd.resumo || '',
+      pendente: vazio(fd.resumo) && vazio(fd.titulo),
+    }
+  }))
 
   return `<div class="contem"><div class="pagina">
     <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
@@ -266,7 +279,7 @@ function pagIndice (s) {
       })}
     </div>
     <h3 class="sub">Acessar</h3>
-    <div class="grade">${cartoes}</div>
+    ${cartoes}
   </div></div>`
 }
 
