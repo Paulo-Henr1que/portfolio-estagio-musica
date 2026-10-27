@@ -4,22 +4,23 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 :root{
-  --pastel:#EDF4E9;      /* fundo geral, verde bem clarinho */
+  --pastel:#E9F1E4;      /* fundo geral, verde bem clarinho */
   --pastel-2:#DDEBD6;    /* faixas e bordas suaves */
-  --claro:#C6DDBE;
-  --medio:#7D9E73;       /* detalhes, ícones, linhas */
-  --medio-f:#5F8456;
-  --escuro:#2C4428;      /* títulos */
-  --escuro-2:#1E311C;
-  --creme:#FBF8F1;
+  --claro:#C2D9BA;
+  --medio:#6E9166;       /* detalhes, ícones, linhas */
+  --medio-f:#4F7549;
+  --escuro:#24402A;      /* títulos, verde tinta */
+  --escuro-2:#172C1B;
+  --creme:#F7F4EA;       /* papel de partitura */
   --branco:#FFFFFF;
-  --tinta:#33403A;       /* corpo de texto */
-  --tinta-2:#6E7F72;     /* texto secundário */
-  --borda:#D5E3CD;
+  --tinta:#2E3A33;       /* corpo de texto */
+  --tinta-2:#67786C;     /* texto secundário */
+  --borda:#D3E2CB;
+  --linha:#BBD2B2;       /* linha de pauta */
   --sombra:0 1px 2px rgba(44,68,40,.05), 0 8px 24px -12px rgba(44,68,40,.18);
   --sombra-f:0 2px 6px rgba(44,68,40,.08), 0 18px 40px -16px rgba(44,68,40,.28);
   --raio:14px;
-  --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --serif:"EB Garamond", Georgia, "Times New Roman", serif;
   --sans:"Karla", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --larg:1120px;
   color-scheme: light;
@@ -37,9 +38,13 @@ html{ scroll-behavior:smooth; }
 body{
   min-height:100vh; display:flex; flex-direction:column;
   margin:0; background:var(--pastel); color:var(--tinta);
-  font-family:var(--sans); font-size:17px; line-height:1.68;
+  font-family:var(--sans); font-size:16.5px; line-height:1.6;
   -webkit-font-smoothing:antialiased;
 }
+/* O texto de leitura é serifado: é um trabalho acadêmico longo, e a
+   serifa com entrelinha larga cansa menos. A sans fica na navegação,
+   nos rótulos e nas legendas. */
+.corpo{ font-family:var(--serif); font-size:19.5px; line-height:1.72; }
 
 img{ max-width:100%; height:auto; display:block; }
 a{ color:var(--medio-f); }
@@ -101,67 +106,82 @@ a{ color:var(--medio-f); }
 }
 
 /* ── Faixa de abertura ──────────────────────────────────────────── */
+/* ── A capa é uma folha de papel pautado ────────────────────────────
+   Pautas de cinco linhas correm por toda a altura, e um clarão central
+   as apaga por trás do título para o texto continuar legível. */
 .capa{
   background:
-    radial-gradient(900px 420px at 88% -12%, rgba(198,221,190,.55), transparent 62%),
-    radial-gradient(640px 320px at 4% 108%, rgba(221,235,214,.75), transparent 60%),
+    radial-gradient(900px 400px at 50% 40%,
+      var(--creme) 0%, var(--creme) 42%, rgba(247,244,234,.82) 66%, rgba(247,244,234,0) 88%),
+    repeating-linear-gradient(to bottom,
+      var(--linha) 0 1px, transparent 1px 7px,
+      var(--linha) 7px 8px, transparent 8px 14px,
+      var(--linha) 14px 15px, transparent 15px 21px,
+      var(--linha) 21px 22px, transparent 22px 28px,
+      var(--linha) 28px 29px, transparent 29px 78px),
     var(--creme);
+  background-position:center, center 30px, 0 0;
   border-bottom:1px solid var(--borda); position:relative; overflow:hidden;
 }
-.capa .contem{ padding-top:60px; padding-bottom:124px; position:relative; z-index:2; }
+.capa .contem{ padding-top:76px; padding-bottom:150px; position:relative;
+               z-index:2; text-align:center; }
 
-/* ── O pentagrama da capa ───────────────────────────────────────────
-   As cinco linhas são feitas em CSS, para ficarem nítidas em qualquer
-   largura. A clave, as notas e o tamanduá são SVG posicionados sobre
-   elas, com as coordenadas calculadas para pousar nas linhas certas. */
-/* Tudo se ancora na BASE da capa, para a pauta passar por baixo do texto
-   e nunca cruzar com ele. A pauta ocupa de 28px a 93px acima da borda;
-   no SVG das notas, a linha de cima é y=46 e a de baixo, y=110. */
-.pauta{
-  position:absolute; left:0; right:0; bottom:28px; height:65px; z-index:1;
-  pointer-events:none;
+/* ── A pauta viva, no pé da capa ────────────────────────────────────
+   As cinco linhas são CSS, para acompanharem qualquer largura. A clave,
+   a fórmula de compasso, as notas e o tamanduá são SVG de altura fixa
+   sobrepostos a elas. Toda a geometria usa a mesma caixa de 120px:
+   as linhas ficam em y = 40, 56, 72, 88 e 104. */
+.pentagrama{
+  position:absolute; left:0; right:0; bottom:24px; height:120px;
+  z-index:1; pointer-events:none; color:var(--medio);
+}
+.pentagrama .linhas{
+  position:absolute; left:0; right:0; top:40px; height:65px;
   background:repeating-linear-gradient(to bottom,
-    var(--claro) 0 1.4px, transparent 1.4px 16.25px);
-  -webkit-mask-image:linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-          mask-image:linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    var(--linha) 0 1.3px, transparent 1.3px 16.25px);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
 }
-.clave-capa{
-  position:absolute; left:5%; bottom:19px; height:83px; width:auto;
-  color:var(--medio); opacity:.5; z-index:1; pointer-events:none;
+.pentagrama svg{ position:absolute; top:0; height:120px; width:auto; }
+.pentagrama .abre{ left:max(16px, 4%); }
+.pentagrama .fecha{ right:max(16px, 4%); }
+
+@media (max-width:900px){
+  .pentagrama .notas-meio{ display:none; }
 }
-.compasso-capa{
-  position:absolute; right:5%; bottom:18px; width:300px; height:120px;
-  color:var(--medio); z-index:1; pointer-events:none;
-}
-@media (max-width:760px){
-  .clave-capa{ left:3%; opacity:.4; }
-  .compasso-capa{ right:3%; opacity:.5; }
-}
-@media (max-width:560px){
-  .capa .contem{ padding-bottom:108px; }
-  .clave-capa{ display:none; }
-  .compasso-capa{ width:208px; height:83px; bottom:13px; right:6%; }
+@media (max-width:620px){
+  .capa .contem{ padding-top:56px; padding-bottom:124px; }
+  .pentagrama{ height:96px; bottom:18px; }
+  .pentagrama svg{ height:96px; }
+  .pentagrama .linhas{ top:32px; height:52px;
+    background:repeating-linear-gradient(to bottom,
+      var(--linha) 0 1.1px, transparent 1.1px 13px); }
 }
 
+/* Linha de atribuição, no lugar onde a partitura traz o compositor. */
 .rotulo{
-  display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700;
-  letter-spacing:1.6px; text-transform:uppercase; color:var(--medio-f);
-  background:var(--branco); border:1px solid var(--borda);
-  padding:6px 14px; border-radius:999px; margin-bottom:20px;
+  display:inline-flex; align-items:center; gap:10px; font-family:var(--serif);
+  font-size:17px; font-style:italic; color:var(--medio-f); margin-bottom:26px;
 }
-.rotulo svg{ width:14px; height:14px; }
+.rotulo::before, .rotulo::after{
+  content:""; width:46px; height:1px; background:var(--linha); }
+@media (max-width:620px){ .rotulo::before, .rotulo::after{ width:24px; } }
 
 h1{
-  font-family:var(--serif); font-weight:600; color:var(--escuro);
-  font-size:clamp(32px, 5.4vw, 52px); line-height:1.14; margin:0 0 14px;
-  text-wrap:balance; letter-spacing:-.4px;
+  font-family:var(--serif); font-weight:500; color:var(--escuro);
+  font-size:clamp(34px, 5.6vw, 58px); line-height:1.1; margin:0 auto 18px;
+  text-wrap:balance; letter-spacing:-.2px; max-width:26ch;
 }
-.capa p.linha{ font-size:18px; color:var(--tinta-2); max-width:62ch; margin:0; }
+.capa p.linha{
+  font-family:var(--serif); font-size:19px; color:var(--tinta-2);
+  max-width:54ch; margin:0 auto; line-height:1.6;
+}
 
 /* ── Seções e títulos ───────────────────────────────────────────── */
-main{ flex:1; padding:46px 0 80px; }
+main{ flex:1; padding:0 0 96px; }
 /* Sob o título de cada página corre uma pauta curta, que se desfaz à
    direita — a mesma ideia da capa, em escala menor. */
+.pagina{ padding-top:76px; }
 .pagina > header{ margin-bottom:30px; padding-bottom:30px; position:relative; }
 .pagina > header::after{
   content:""; position:absolute; left:0; right:0; bottom:0; height:25px;
@@ -187,18 +207,18 @@ main{ flex:1; padding:46px 0 80px; }
 
 h3.sub{
   font-family:var(--serif); font-weight:600; color:var(--escuro);
-  font-size:25px; line-height:1.28; margin:34px 0 10px; text-wrap:balance;
-  position:relative; padding-left:28px;
+  font-size:27px; line-height:1.26; margin:58px 0 16px; text-wrap:balance;
+  position:relative; padding-left:30px;
 }
 h3.sub::before{
-  content:""; position:absolute; left:0; top:.3em; width:17px; height:20px;
+  content:""; position:absolute; left:0; top:.28em; width:17px; height:20px;
   background:var(--nota) no-repeat center / contain; opacity:.85;
 }
 h3.sub:first-child{ margin-top:0; }
 
 .cartao{
   background:var(--branco); border:1px solid var(--borda); border-radius:var(--raio);
-  padding:30px 32px; box-shadow:var(--sombra); margin-bottom:22px;
+  padding:38px 42px; box-shadow:var(--sombra); margin-bottom:22px;
 }
 @media (max-width:620px){ .cartao{ padding:22px 19px; } }
 
@@ -215,29 +235,34 @@ h3.sub:first-child{ margin-top:0; }
 .ident{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:0;
         background:var(--branco); border:1px solid var(--borda); border-radius:var(--raio);
         overflow:hidden; }
-.ident div{ padding:14px 18px; border-right:1px solid var(--borda);
+.ident div{ padding:19px 24px; border-right:1px solid var(--borda);
             border-bottom:1px solid var(--borda); }
-.ident dt{ font-size:10.5px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
-           color:var(--medio); margin:0 0 3px; }
-.ident dd{ margin:0; font-size:16px; color:var(--tinta); font-weight:500; }
+.ident dt{ font-size:12.5px; font-weight:600; letter-spacing:.2px;
+           color:var(--medio-f); margin:0 0 4px; }
+.ident dd{ margin:0; font-family:var(--serif); font-size:19px;
+           color:var(--tinta); font-weight:500; }
 .ident dd.vazio{ color:#AEBCB2; font-style:italic; font-weight:400; }
 
 /* ── Cartões de navegação ───────────────────────────────────────── */
 .grade{ display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); }
 .atalho{
   display:block; background:var(--branco); border:1px solid var(--borda);
-  border-radius:var(--raio); padding:22px 22px 20px; text-decoration:none; color:inherit;
+  border-radius:var(--raio); padding:24px 26px 22px; text-decoration:none; color:inherit;
   box-shadow:var(--sombra); position:relative; overflow:hidden;
   transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .atalho:hover{ transform:translateY(-3px); box-shadow:var(--sombra-f); border-color:var(--claro); }
 .atalho:focus-visible{ outline:2.5px solid var(--medio-f); outline-offset:3px; }
+/* Marca de ensaio: o quadrado numerado que o maestro usa para dizer
+   "a partir daqui". Aqui diz em que parte do portfólio você está. */
 .atalho .n{
-  font-family:var(--serif); font-size:34px; line-height:1; color:var(--claro);
-  font-weight:600; position:absolute; right:18px; top:14px;
+  position:absolute; right:20px; top:19px; width:31px; height:31px;
+  border:1.5px solid var(--medio); display:grid; place-items:center;
+  font-family:var(--sans); font-size:13px; font-weight:700;
+  color:var(--medio-f); letter-spacing:0; background:var(--branco);
 }
-.atalho strong{ display:block; font-family:var(--serif); font-size:20px; font-weight:600;
-                color:var(--escuro); margin-bottom:5px; padding-right:40px; }
+.atalho strong{ display:block; font-family:var(--serif); font-size:22px; font-weight:600;
+                color:var(--escuro); margin-bottom:6px; padding-right:46px; line-height:1.25; }
 .atalho .meta{ font-size:12.5px; color:var(--medio-f); font-weight:600;
                letter-spacing:.3px; margin-bottom:7px; }
 .atalho .res{ font-size:14.5px; color:var(--tinta-2); line-height:1.55; }

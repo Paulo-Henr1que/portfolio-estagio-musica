@@ -135,32 +135,71 @@ function pagInicio (s) {
 
   return `
   <section class="capa">
-    <div class="pauta" aria-hidden="true"></div>
-    <svg class="clave-capa" viewBox="0 0 48 96" aria-hidden="true"><use href="#clave"/></svg>
-    <!-- As notas pousam nas linhas do pentagrama (y = 46, 62, 78, 94 e 110)
-         e o tamanduá caminha sobre a última delas. -->
-    <svg class="compasso-capa" viewBox="0 0 300 120" aria-hidden="true">
-      <g fill="currentColor" opacity=".62">
-        <g transform="translate(18 94)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
-          <rect x="5.6" y="-30" width="2.6" height="30"/></g>
-        <g transform="translate(56 78)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
-          <rect x="5.6" y="-30" width="2.6" height="30"/></g>
-        <g transform="translate(94 86)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
-          <rect x="5.6" y="-30" width="2.6" height="30"/>
-          <path d="M8.2 -30 C17 -25 19 -16 14 -9 C17 -19 13 -24 8.2 -26 Z"/></g>
-        <g transform="translate(136 62)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
-          <rect x="5.6" y="-30" width="2.6" height="30"/></g>
-        <g transform="translate(172 70)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
-          <rect x="5.6" y="-30" width="2.6" height="30"/>
-          <path d="M8.2 -30 C17 -25 19 -16 14 -9 C17 -19 13 -24 8.2 -26 Z"/></g>
-      </g>
-      <g transform="translate(192 60) scale(0.56)" opacity=".9"><use href="#tamandua"/></g>
-    </svg>
+    <!-- A pauta viva. Linhas em y = 40, 56, 72, 88 e 104; as cabeças de
+         nota pousam nelas ou nos espaços, e o tamanduá caminha sobre a
+         linha de baixo. -->
+    <div class="pentagrama" aria-hidden="true">
+      <div class="linhas"></div>
+
+      <svg class="abre" viewBox="0 0 250 120">
+        <g fill="currentColor">
+          <g transform="translate(8 12)" opacity=".8"><use href="#clave" width="48" height="96"/></g>
+          <!-- fórmula de compasso: 4/4, entre a primeira e a terceira
+               linha e entre a terceira e a quinta -->
+          <text x="78" y="68" font-family="EB Garamond, Georgia, serif" font-size="42"
+                font-weight="600" text-anchor="middle" opacity=".72">4</text>
+          <text x="78" y="101" font-family="EB Garamond, Georgia, serif" font-size="42"
+                font-weight="600" text-anchor="middle" opacity=".72">4</text>
+          <g opacity=".66">
+            <g transform="translate(130 96)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+            <g transform="translate(170 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/>
+              <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
+            <g transform="translate(206 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          </g>
+          <!-- barra de compasso -->
+          <rect x="240" y="40" width="1.8" height="64" opacity=".5"/>
+        </g>
+      </svg>
+
+      <svg class="notas-meio" viewBox="0 0 180 120" style="left:calc(50% - 90px)">
+        <g fill="currentColor" opacity=".66">
+          <g transform="translate(16 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          <g transform="translate(54 72)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/>
+            <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
+          <g transform="translate(92 56)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          <g transform="translate(130 72)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          <rect x="170" y="40" width="1.8" height="64" opacity=".75"/>
+        </g>
+      </svg>
+
+      <svg class="fecha" viewBox="0 0 290 120">
+        <g fill="currentColor">
+          <g opacity=".66">
+            <g transform="translate(16 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+            <g transform="translate(56 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/>
+              <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
+            <g transform="translate(96 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          </g>
+          <!-- barra final: fina e depois grossa, como encerra a partitura -->
+          <rect x="138" y="40" width="1.8" height="64" opacity=".55"/>
+          <rect x="145" y="40" width="5.4" height="64" opacity=".75"/>
+        </g>
+        <g transform="translate(176 48.8) scale(0.62)" opacity=".92"><use href="#tamandua" width="150" height="100"/></g>
+      </svg>
+    </div>
+
     <div class="contem">
-      <span class="rotulo">
-        <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#notas"/></svg>
-        Portfólio Reflexivo de Estágio
-      </span>
+      <span class="rotulo">Portfólio reflexivo de estágio supervisionado</span>
       <h1>${vazio(d.titulo) ? 'Portfólio Reflexivo de Estágio Supervisionado em Licenciatura em Música'
                             : esc(d.titulo)}</h1>
       <p class="linha">Relatos de observação, planos de aula, relatos das aulas ministradas
