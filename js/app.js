@@ -208,6 +208,21 @@ function pagInicio (s) {
           </g>
         </svg>
 
+        <span class="elastico"></span>
+
+        <!-- compasso compacto: so aparece quando a tela nao comporta os cheios -->
+        <svg class="g-mini" viewBox="0 0 120 120">
+          <g fill="currentColor" opacity=".66">
+            <g transform="translate(20 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+            <g transform="translate(60 72)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/>
+              <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
+            <g transform="translate(100 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          </g>
+        </svg>
+
         <svg class="g-fim" viewBox="0 0 146 120">
           <g fill="currentColor">
             <!-- barra final: fina e depois grossa, como encerra a partitura -->

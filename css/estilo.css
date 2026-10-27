@@ -129,18 +129,26 @@ a{ color:var(--medio-f); }
                z-index:2; text-align:center; }
 
 /* ── A pauta viva ───────────────────────────────────────────────────
-   As cinco linhas são CSS, para acompanharem qualquer largura. Os
-   grupos (clave, compassos, barra final com o tamanduá) ficam numa
-   linha flex: lado a lado, nunca sobrepostos, seja qual for a tela.
-   Quando o espaço aperta, um grupo inteiro sai; nenhum encavala. */
+   Os grupos (clave, compassos, barra final com o tamanduá) são itens de
+   uma linha flex: ficam lado a lado e não podem se sobrepor em largura
+   nenhuma. Quando o espaço aperta, sai um compasso inteiro.
+
+   A altura --h comanda tudo: os SVG têm height:100%, e as linhas da
+   pauta são calculadas a partir dela. Como no SVG as linhas estão em
+   y = 40, 56, 72, 88 e 104 de uma caixa de 120, a primeira linha cai
+   sempre em --h/3 e o intervalo entre linhas em --h × 0,13542. Assim as
+   notas pousam nas linhas em qualquer escala. */
 .pentagrama{
-  position:absolute; left:0; right:0; bottom:24px; height:120px;
+  --h:120px;
+  position:absolute; left:0; right:0; bottom:24px; height:var(--h);
   z-index:1; pointer-events:none; color:var(--medio);
 }
 .pentagrama .linhas{
-  position:absolute; left:0; right:0; top:40px; height:65px;
+  position:absolute; left:0; right:0;
+  top:calc(var(--h) / 3);
+  height:calc(var(--h) * 0.5417);
   background:repeating-linear-gradient(to bottom,
-    var(--linha) 0 1.3px, transparent 1.3px 16.25px);
+    var(--linha) 0 1.2px, transparent 1.2px calc(var(--h) * 0.13542));
   -webkit-mask-image:linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
           mask-image:linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
 }
@@ -150,20 +158,24 @@ a{ color:var(--medio-f); }
 }
 .pentagrama svg{ height:100%; width:auto; flex:none; display:block; }
 .pentagrama .elastico{ flex:1 1 0; min-width:12px; }
+.pentagrama .g-mini{ display:none; }
 
-/* Conforme a largura cai, saem compassos inteiros — da direita para a
-   esquerda, preservando a abertura e o encerramento da pauta. */
-@media (max-width:1000px){ .pentagrama .g-compasso:nth-of-type(4){ display:none; } }
-@media (max-width:760px){  .pentagrama .g-compasso:nth-of-type(3){ display:none; } }
-@media (max-width:470px){  .pentagrama .g-compasso{ display:none; } }
+/* Conforme a largura cai, saem compassos inteiros, da direita para a
+   esquerda. No lugar do último entra o compasso compacto, para a pauta
+   nunca ficar sem notas. */
+@media (max-width:1000px){ .pentagrama svg.g-compasso:nth-of-type(4){ display:none; } }
+@media (max-width:760px){  .pentagrama svg.g-compasso:nth-of-type(3){ display:none; } }
+@media (max-width:470px){
+  .pentagrama svg.g-compasso{ display:none; }
+  .pentagrama .g-mini{ display:block; }
+}
 
 @media (max-width:620px){
   .capa .contem{ padding-top:56px; padding-bottom:124px; }
-  .pentagrama{ height:96px; bottom:18px; }
-  .pentagrama .linhas{ top:32px; height:52px;
-    background:repeating-linear-gradient(to bottom,
-      var(--linha) 0 1.1px, transparent 1.1px 13px); }
+  .pentagrama{ --h:96px; bottom:18px; }
 }
+@media (max-width:470px){ .pentagrama{ --h:86px; } }
+@media (max-width:380px){ .pentagrama{ --h:76px; } }
 
 /* Linha de atribuição, no lugar onde a partitura traz o compositor. */
 .rotulo{
