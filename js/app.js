@@ -148,67 +148,78 @@ function pagInicio (s) {
 
   return `
   <section class="capa">
-    <!-- A pauta viva. Linhas em y = 40, 56, 72, 88 e 104; as cabeças de
-         nota pousam nelas ou nos espaços, e o tamanduá caminha sobre a
-         linha de baixo. -->
+    <!-- A pauta viva.
+         Os grupos ficam numa linha flex, lado a lado: assim nenhum pode
+         montar em cima do outro, em largura nenhuma. Quando o espaço
+         aperta, grupos inteiros saem de cena, nunca se sobrepõem.
+         A geometria é sempre a mesma caixa de 120 de altura, com as
+         linhas da pauta em y = 40, 56, 72, 88 e 104. -->
     <div class="pentagrama" aria-hidden="true">
       <div class="linhas"></div>
+      <div class="fila">
 
-      <svg class="abre" viewBox="0 0 250 120">
-        <g fill="currentColor">
-          <g transform="translate(8 12)" opacity=".8"><use href="#clave" width="48" height="96"/></g>
-          <!-- fórmula de compasso: 4/4, entre a primeira e a terceira
-               linha e entre a terceira e a quinta -->
-          <text x="78" y="68" font-family="EB Garamond, Georgia, serif" font-size="42"
-                font-weight="600" text-anchor="middle" opacity=".72">4</text>
-          <text x="78" y="101" font-family="EB Garamond, Georgia, serif" font-size="42"
-                font-weight="600" text-anchor="middle" opacity=".72">4</text>
-          <g class="so-largo" opacity=".66">
-            <g transform="translate(130 96)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
-            <g transform="translate(170 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-              <rect x="5.8" y="-32" width="2.6" height="32"/>
-              <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
-            <g transform="translate(206 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+        <svg class="g-clave" viewBox="0 0 126 120">
+          <g fill="currentColor">
+            <g transform="translate(8 12)" opacity=".8"><use href="#clave" width="48" height="96"/></g>
+            <text x="92" y="68" font-family="EB Garamond, Georgia, serif" font-size="42"
+                  font-weight="600" text-anchor="middle" opacity=".72">4</text>
+            <text x="92" y="101" font-family="EB Garamond, Georgia, serif" font-size="42"
+                  font-weight="600" text-anchor="middle" opacity=".72">4</text>
           </g>
-          <!-- barra de compasso -->
-          <rect class="so-largo" x="240" y="40" width="1.8" height="64" opacity=".5"/>
-        </g>
-      </svg>
+        </svg>
 
-      <svg class="notas-meio" viewBox="0 0 180 120" style="left:calc(50% - 90px)">
-        <g fill="currentColor" opacity=".66">
-          <g transform="translate(16 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+        <svg class="g-compasso" viewBox="0 0 160 120">
+          <g fill="currentColor" opacity=".66">
+          <g transform="translate(22 96)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
             <rect x="5.8" y="-32" width="2.6" height="32"/></g>
-          <g transform="translate(54 72)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+          <g transform="translate(62 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
             <rect x="5.8" y="-32" width="2.6" height="32"/>
             <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
-          <g transform="translate(92 56)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+          <g transform="translate(102 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
             <rect x="5.8" y="-32" width="2.6" height="32"/></g>
-          <g transform="translate(130 72)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
-          <rect x="170" y="40" width="1.8" height="64" opacity=".75"/>
-        </g>
-      </svg>
-
-      <svg class="fecha" viewBox="0 0 290 120">
-        <g fill="currentColor">
-          <g class="so-largo" opacity=".66">
-            <g transform="translate(16 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
-            <g transform="translate(56 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-              <rect x="5.8" y="-32" width="2.6" height="32"/>
-              <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
-            <g transform="translate(96 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
-              <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+            <rect x="150" y="40" width="1.8" height="64" opacity=".75"/>
           </g>
-          <!-- barra final: fina e depois grossa, como encerra a partitura -->
-          <rect x="138" y="40" width="1.8" height="64" opacity=".55"/>
-          <rect x="145" y="40" width="5.4" height="64" opacity=".75"/>
-        </g>
-        <g transform="translate(176 48.8) scale(0.62)" opacity=".92"><use href="#tamandua" width="150" height="100"/></g>
-      </svg>
+        </svg>
+
+        <span class="elastico"></span>
+
+        <svg class="g-compasso" viewBox="0 0 160 120">
+          <g fill="currentColor" opacity=".66">
+          <g transform="translate(22 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          <g transform="translate(62 72)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/>
+            <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
+          <g transform="translate(102 56)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+            <rect x="150" y="40" width="1.8" height="64" opacity=".75"/>
+          </g>
+        </svg>
+
+        <svg class="g-compasso" viewBox="0 0 136 120">
+          <g fill="currentColor" opacity=".66">
+          <g transform="translate(22 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          <g transform="translate(62 88)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/></g>
+          <g transform="translate(102 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
+            <rect x="5.8" y="-32" width="2.6" height="32"/>
+            <path d="M8.4 -32 C17.6 -26.6 19.6 -17 14.4 -9.6 C17.6 -20 13.4 -25.4 8.4 -27.4 Z"/></g>
+          </g>
+        </svg>
+
+        <svg class="g-fim" viewBox="0 0 146 120">
+          <g fill="currentColor">
+            <!-- barra final: fina e depois grossa, como encerra a partitura -->
+            <rect x="6" y="40" width="1.8" height="64" opacity=".55"/>
+            <rect x="13" y="40" width="5.4" height="64" opacity=".75"/>
+          </g>
+          <g transform="translate(44 48.8) scale(0.62)" opacity=".92">
+            <use href="#tamandua" width="150" height="100"/>
+          </g>
+        </svg>
+
+      </div>
     </div>
 
     <div class="contem">

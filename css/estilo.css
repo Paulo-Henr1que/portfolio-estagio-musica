@@ -128,11 +128,11 @@ a{ color:var(--medio-f); }
 .capa .contem{ padding-top:76px; padding-bottom:150px; position:relative;
                z-index:2; text-align:center; }
 
-/* ── A pauta viva, no pé da capa ────────────────────────────────────
-   As cinco linhas são CSS, para acompanharem qualquer largura. A clave,
-   a fórmula de compasso, as notas e o tamanduá são SVG de altura fixa
-   sobrepostos a elas. Toda a geometria usa a mesma caixa de 120px:
-   as linhas ficam em y = 40, 56, 72, 88 e 104. */
+/* ── A pauta viva ───────────────────────────────────────────────────
+   As cinco linhas são CSS, para acompanharem qualquer largura. Os
+   grupos (clave, compassos, barra final com o tamanduá) ficam numa
+   linha flex: lado a lado, nunca sobrepostos, seja qual for a tela.
+   Quando o espaço aperta, um grupo inteiro sai; nenhum encavala. */
 .pentagrama{
   position:absolute; left:0; right:0; bottom:24px; height:120px;
   z-index:1; pointer-events:none; color:var(--medio);
@@ -144,23 +144,22 @@ a{ color:var(--medio-f); }
   -webkit-mask-image:linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
           mask-image:linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
 }
-.pentagrama svg{ position:absolute; top:0; height:120px; width:auto; }
-.pentagrama .abre{ left:max(16px, 4%); }
-.pentagrama .fecha{ right:max(16px, 4%); }
+.pentagrama .fila{
+  position:relative; display:flex; align-items:flex-start;
+  height:100%; padding:0 max(16px, 4%);
+}
+.pentagrama svg{ height:100%; width:auto; flex:none; display:block; }
+.pentagrama .elastico{ flex:1 1 0; min-width:12px; }
 
-@media (max-width:900px){
-  .pentagrama .notas-meio{ display:none; }
-}
-/* Abaixo disso os dois grupos da pauta se encostariam e as cabeças de
-   nota ficariam sobrepostas. Sobram a clave com a fórmula de compasso
-   à esquerda e a barra final com o tamanduá à direita. */
-@media (max-width:620px){
-  .pentagrama .so-largo{ display:none; }
-}
+/* Conforme a largura cai, saem compassos inteiros — da direita para a
+   esquerda, preservando a abertura e o encerramento da pauta. */
+@media (max-width:1000px){ .pentagrama .g-compasso:nth-of-type(4){ display:none; } }
+@media (max-width:760px){  .pentagrama .g-compasso:nth-of-type(3){ display:none; } }
+@media (max-width:470px){  .pentagrama .g-compasso{ display:none; } }
+
 @media (max-width:620px){
   .capa .contem{ padding-top:56px; padding-bottom:124px; }
   .pentagrama{ height:96px; bottom:18px; }
-  .pentagrama svg{ height:96px; }
   .pentagrama .linhas{ top:32px; height:52px;
     background:repeating-linear-gradient(to bottom,
       var(--linha) 0 1.1px, transparent 1.1px 13px); }
@@ -405,3 +404,15 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 
 .indice .res.pendente{ color:#A9BBA4; font-style:italic; font-family:var(--serif);
                        font-size:16.5px; }
+
+/* Telas muito estreitas: a marca encolhe para o botão do menu não ser
+   empurrado para fora e criar rolagem horizontal. */
+@media (max-width:420px){
+  .topo-in{ gap:10px; padding:0 16px; min-height:66px; }
+  .marca{ gap:8px; min-width:0; }
+  .marca svg{ width:34px; height:34px; }
+  .marca b{ font-size:16px; }
+  .marca span{ font-size:9px; letter-spacing:.9px; }
+  .hamburguer{ width:42px; height:42px; flex:none; }
+  .menu{ inset:66px 0 auto 0; max-height:calc(100vh - 66px); }
+}
