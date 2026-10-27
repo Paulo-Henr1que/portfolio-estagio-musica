@@ -163,7 +163,7 @@ function pagInicio (s) {
                 font-weight="600" text-anchor="middle" opacity=".72">4</text>
           <text x="78" y="101" font-family="EB Garamond, Georgia, serif" font-size="42"
                 font-weight="600" text-anchor="middle" opacity=".72">4</text>
-          <g opacity=".66">
+          <g class="so-largo" opacity=".66">
             <g transform="translate(130 96)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
               <rect x="5.8" y="-32" width="2.6" height="32"/></g>
             <g transform="translate(170 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
@@ -173,7 +173,7 @@ function pagInicio (s) {
               <rect x="5.8" y="-32" width="2.6" height="32"/></g>
           </g>
           <!-- barra de compasso -->
-          <rect x="240" y="40" width="1.8" height="64" opacity=".5"/>
+          <rect class="so-largo" x="240" y="40" width="1.8" height="64" opacity=".5"/>
         </g>
       </svg>
 
@@ -194,7 +194,7 @@ function pagInicio (s) {
 
       <svg class="fecha" viewBox="0 0 290 120">
         <g fill="currentColor">
-          <g opacity=".66">
+          <g class="so-largo" opacity=".66">
             <g transform="translate(16 80)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>
               <rect x="5.8" y="-32" width="2.6" height="32"/></g>
             <g transform="translate(56 64)"><ellipse rx="7.6" ry="5.6" transform="rotate(-20)"/>

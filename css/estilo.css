@@ -151,6 +151,12 @@ a{ color:var(--medio-f); }
 @media (max-width:900px){
   .pentagrama .notas-meio{ display:none; }
 }
+/* Abaixo disso os dois grupos da pauta se encostariam e as cabeças de
+   nota ficariam sobrepostas. Sobram a clave com a fórmula de compasso
+   à esquerda e a barra final com o tamanduá à direita. */
+@media (max-width:620px){
+  .pentagrama .so-largo{ display:none; }
+}
 @media (max-width:620px){
   .capa .contem{ padding-top:56px; padding-bottom:124px; }
   .pentagrama{ height:96px; bottom:18px; }
