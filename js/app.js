@@ -4,12 +4,7 @@
 //  e, mesmo assim, com um endereço próprio para cada página.
 // ═══════════════════════════════════════════════════════════════════
 
-const App = {
-  sb: null,          // cliente Supabase
-  conteudo: {},      // id da seção -> conteúdo que está sendo exibido
-  sessao: null,      // usuário logado, quando houver
-  previa: false,     // administradora vendo o rascunho em vez do publicado
-}
+const App = { conteudo: {} }
 
 const el = document.getElementById('conteudo')
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) =>
@@ -21,13 +16,6 @@ const paragrafos = (t) => String(t || '').split(/\n{2,}/)
   .map(p => '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>').join('')
 
 const vazio = (v) => v === undefined || v === null || String(v).trim() === ''
-
-// ── Conexão ────────────────────────────────────────────────────────
-function conectar () {
-  const c = window.CONFIG || {}
-  if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY) return null
-  return window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY)
-}
 
 // ── Menu ───────────────────────────────────────────────────────────
 function montarMenu () {
@@ -60,29 +48,8 @@ function marcarMenu (id) {
 }
 
 // ── Leitura do conteúdo ────────────────────────────────────────────
-// Visitante lê a view secoes_publicas (só o publicado).
-// Administradora em modo prévia lê a tabela base (o rascunho).
-async function carregar () {
-  if (!App.sb) return {}
-  const mapa = {}
-  try {
-    if (App.previa && App.sessao) {
-      const { data, error } = await App.sb.from('secoes').select('id, rascunho')
-      if (error) throw error
-      ;(data || []).forEach(r => { mapa[r.id] = r.rascunho || {} })
-    } else {
-      const { data, error } = await App.sb.from('secoes_publicas').select('id, conteudo')
-      if (error) throw error
-      ;(data || []).forEach(r => { mapa[r.id] = r.conteudo || {} })
-    }
-  } catch (e) {
-    console.error('Falha ao carregar o conteúdo:', e)
-  }
-  App.conteudo = mapa
-  return mapa
-}
-
-const dados = (id) => App.conteudo[id] || {}
+// Tudo vem de js/conteudo.js, carregado junto com a página.
+const dados = (id) => (window.CONTEUDO && window.CONTEUDO[id]) || {}
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
 function renderBloco (b) {
@@ -122,7 +89,9 @@ const renderBlocos = (lista) =>
 
 // ── Pedaços reaproveitados ─────────────────────────────────────────
 function renderCampos (defs, valores) {
-  const itens = (defs || []).filter(([k]) => !vazio(valores[k]))
+  // titulo e numero já aparecem no H1 e na trilha; não se repetem nas fichas
+  const ocultos = ['titulo', 'numero']
+  const itens = (defs || []).filter(([k]) => !vazio(valores[k]) && !ocultos.includes(k))
   if (!itens.length) return ''
   return `<div class="campos">` + itens.map(([k, rot]) =>
     `<div class="campo"><b>${esc(rot)}</b><span>${esc(valores[k])}</span></div>`).join('') + `</div>`
@@ -303,23 +272,13 @@ function rota () {
   return (location.hash.replace(/^#\/?/, '') || 'inicio').split('?')[0]
 }
 
-async function render () {
+function render () {
   const id = rota()
-
-  if (id === 'admin') { marcarMenu(''); return Admin.render(el) }
 
   const s = window.secao(id)
   if (!s) { location.hash = '#/inicio'; return }
 
   marcarMenu(id)
-
-  if (!App.sb) {
-    el.innerHTML = `<div class="contem"><div class="pagina"><div class="aviso">
-      <b>Falta conectar o banco de dados</b>
-      Abra <code>js/config.js</code> e preencha o endereço e a chave do Supabase.
-      O passo a passo está no arquivo <code>README.md</code> do projeto.</div></div></div>`
-    return
-  }
 
   if (s.id === 'inicio') el.innerHTML = pagInicio(s)
   else if (s.filhos) el.innerHTML = pagIndice(s)
@@ -354,19 +313,11 @@ document.addEventListener('click', (e) => {
 })
 
 // ── Início ─────────────────────────────────────────────────────────
-;(async function iniciar () {
+;(function iniciar () {
   montarMenu()
-  App.sb = conectar()
-  if (App.sb) {
-    const { data } = await App.sb.auth.getSession()
-    App.sessao = data.session || null
-    await carregar()
-  }
-  Admin.iniciar()
   window.addEventListener('hashchange', render)
-  await render()
+  render()
 })()
 
 window.App = App
-window.recarregar = async () => { await carregar(); await render() }
 window.esc = esc

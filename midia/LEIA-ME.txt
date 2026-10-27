@@ -1,0 +1,12 @@
+Coloque aqui as fotos, os vídeos e os documentos do portfólio.
+
+Depois, no arquivo js/conteudo.js, aponte para eles assim:
+
+  { tipo: 'imagem', url: 'midia/sala-de-aula.jpg', legenda: 'Turma do 6º ano' }
+  { tipo: 'video',  url: 'midia/aula-3.mp4',       legenda: 'Atividade rítmica' }
+
+Dicas:
+- Use nomes sem acento e sem espaço: "aula-3.mp4", não "Aula 3.mp4".
+- Imagens: salve em JPG com largura de uns 1600px. Não precisa de mais.
+- Vídeos: o GitHub recusa arquivos acima de 100 MB. Comprima antes
+  (o HandBrake, em handbrake.fr, faz isso de graça).
