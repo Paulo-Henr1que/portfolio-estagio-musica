@@ -33,7 +33,9 @@ html{ scroll-behavior:smooth; }
                         transition-duration:.01ms !important; }
 }
 
+/* coluna em altura total: o rodape encosta na base mesmo em pagina curta */
 body{
+  min-height:100vh; display:flex; flex-direction:column;
   margin:0; background:var(--pastel); color:var(--tinta);
   font-family:var(--sans); font-size:17px; line-height:1.68;
   -webkit-font-smoothing:antialiased;
@@ -106,8 +108,40 @@ a{ color:var(--medio-f); }
     var(--creme);
   border-bottom:1px solid var(--borda); position:relative; overflow:hidden;
 }
-.capa .contem{ padding-top:60px; padding-bottom:58px; position:relative; z-index:2; }
-.pauta{ position:absolute; left:0; right:0; top:50%; opacity:.5; pointer-events:none; z-index:1; }
+.capa .contem{ padding-top:60px; padding-bottom:124px; position:relative; z-index:2; }
+
+/* ── O pentagrama da capa ───────────────────────────────────────────
+   As cinco linhas são feitas em CSS, para ficarem nítidas em qualquer
+   largura. A clave, as notas e o tamanduá são SVG posicionados sobre
+   elas, com as coordenadas calculadas para pousar nas linhas certas. */
+/* Tudo se ancora na BASE da capa, para a pauta passar por baixo do texto
+   e nunca cruzar com ele. A pauta ocupa de 28px a 93px acima da borda;
+   no SVG das notas, a linha de cima é y=46 e a de baixo, y=110. */
+.pauta{
+  position:absolute; left:0; right:0; bottom:28px; height:65px; z-index:1;
+  pointer-events:none;
+  background:repeating-linear-gradient(to bottom,
+    var(--claro) 0 1.4px, transparent 1.4px 16.25px);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+          mask-image:linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.clave-capa{
+  position:absolute; left:5%; bottom:19px; height:83px; width:auto;
+  color:var(--medio); opacity:.5; z-index:1; pointer-events:none;
+}
+.compasso-capa{
+  position:absolute; right:5%; bottom:18px; width:300px; height:120px;
+  color:var(--medio); z-index:1; pointer-events:none;
+}
+@media (max-width:760px){
+  .clave-capa{ left:3%; opacity:.4; }
+  .compasso-capa{ right:3%; opacity:.5; }
+}
+@media (max-width:560px){
+  .capa .contem{ padding-bottom:108px; }
+  .clave-capa{ display:none; }
+  .compasso-capa{ width:208px; height:83px; bottom:13px; right:6%; }
+}
 
 .rotulo{
   display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700;
@@ -125,8 +159,17 @@ h1{
 .capa p.linha{ font-size:18px; color:var(--tinta-2); max-width:62ch; margin:0; }
 
 /* ── Seções e títulos ───────────────────────────────────────────── */
-main{ padding:46px 0 80px; }
-.pagina > header{ margin-bottom:30px; }
+main{ flex:1; padding:46px 0 80px; }
+/* Sob o título de cada página corre uma pauta curta, que se desfaz à
+   direita — a mesma ideia da capa, em escala menor. */
+.pagina > header{ margin-bottom:30px; padding-bottom:30px; position:relative; }
+.pagina > header::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:25px;
+  background:repeating-linear-gradient(to bottom,
+    var(--claro) 0 1.2px, transparent 1.2px 6px);
+  -webkit-mask-image:linear-gradient(90deg, #000 0, #000 26%, transparent 68%);
+          mask-image:linear-gradient(90deg, #000 0, #000 26%, transparent 68%);
+}
 .pagina h2.titulo{
   font-family:var(--serif); font-weight:600; color:var(--escuro);
   font-size:clamp(27px,3.6vw,38px); line-height:1.2; margin:0 0 8px; text-wrap:balance;
@@ -136,9 +179,20 @@ main{ padding:46px 0 80px; }
 .trilho a{ color:var(--medio-f); text-decoration:none; }
 .trilho a:hover{ text-decoration:underline; }
 
+/* Uma colcheia marca cada subtítulo — o mesmo desenho serve para as
+   referências, para o site falar uma língua visual só. */
+:root{
+  --nota:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 28'%3E%3Cg fill='%237D9E73'%3E%3Cellipse cx='8' cy='22' rx='6.4' ry='4.8' transform='rotate(-20 8 22)'/%3E%3Crect x='12.8' y='2.4' width='2.4' height='19.6'/%3E%3Cpath d='M15.2 2.4 C21.4 5.4 23.2 12.4 19 17.4 C21 10.4 19 6.4 15.2 5.4 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
 h3.sub{
   font-family:var(--serif); font-weight:600; color:var(--escuro);
   font-size:25px; line-height:1.28; margin:34px 0 10px; text-wrap:balance;
+  position:relative; padding-left:28px;
+}
+h3.sub::before{
+  content:""; position:absolute; left:0; top:.3em; width:17px; height:20px;
+  background:var(--nota) no-repeat center / contain; opacity:.85;
 }
 h3.sub:first-child{ margin-top:0; }
 
@@ -153,7 +207,7 @@ h3.sub:first-child{ margin-top:0; }
 .corpo p{ margin:0 0 16px; }
 .corpo p:last-child{ margin-bottom:0; }
 .corpo blockquote{
-  margin:20px 0; padding:4px 0 4px 20px; border-left:3px solid var(--claro);
+  margin:20px 0; padding:4px 0 4px 22px; border-left:5px double var(--claro);
   font-family:var(--serif); font-size:21px; line-height:1.5; color:var(--escuro);
 }
 
@@ -205,7 +259,7 @@ figure{ margin:24px 0; }
 figure img, figure video{ border-radius:12px; border:1px solid var(--borda); background:var(--branco); width:100%; }
 figure img{ cursor:zoom-in; }
 figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:1.5;
-            padding-left:13px; border-left:2px solid var(--claro); }
+            padding-left:14px; border-left:4px double var(--claro); }
 .galeria{ display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); margin:24px 0; }
 .galeria img{ aspect-ratio:4/3; object-fit:cover; border-radius:11px;
               border:1px solid var(--borda); cursor:zoom-in; }
@@ -233,8 +287,9 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 /* ── Bibliografia ───────────────────────────────────────────────── */
 .refs{ list-style:none; margin:0; padding:0; }
 .refs li{ padding:15px 0 15px 30px; border-bottom:1px solid var(--borda); position:relative; }
-.refs li::before{ content:"§"; position:absolute; left:4px; top:15px;
-                  color:var(--claro); font-family:var(--serif); font-size:19px; }
+.refs li::before{ content:""; position:absolute; left:3px; top:18px;
+                  width:14px; height:17px; opacity:.6;
+                  background:var(--nota) no-repeat center / contain; }
 .refs li:last-child{ border-bottom:0; }
 
 /* ── Botões ─────────────────────────────────────────────────────── */
@@ -265,7 +320,10 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 
 /* ── Rodapé ─────────────────────────────────────────────────────── */
 .rodape{ background:var(--branco); border-top:1px solid var(--borda); padding:34px 0;
-         margin-top:30px; }
+         margin-top:30px; position:relative; }
+/* barra final, como a que encerra uma partitura */
+.rodape::before{ content:""; position:absolute; left:0; right:0; top:3px;
+                 height:3px; background:var(--claro); }
 .rodape .contem{ display:flex; align-items:center; gap:18px; flex-wrap:wrap;
                  font-size:13.5px; color:var(--tinta-2); }
 .rodape svg{ width:34px; height:34px; opacity:.75; flex:none; }

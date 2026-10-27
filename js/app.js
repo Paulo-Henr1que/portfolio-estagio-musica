@@ -135,11 +135,26 @@ function pagInicio (s) {
 
   return `
   <section class="capa">
-    <svg class="pauta" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true" height="60">
-      <g stroke="var(--claro)" stroke-width="1.4">
-        <line x1="0" y1="12" x2="1200" y2="12"/><line x1="0" y1="24" x2="1200" y2="24"/>
-        <line x1="0" y1="36" x2="1200" y2="36"/><line x1="0" y1="48" x2="1200" y2="48"/>
+    <div class="pauta" aria-hidden="true"></div>
+    <svg class="clave-capa" viewBox="0 0 48 96" aria-hidden="true"><use href="#clave"/></svg>
+    <!-- As notas pousam nas linhas do pentagrama (y = 46, 62, 78, 94 e 110)
+         e o tamanduá caminha sobre a última delas. -->
+    <svg class="compasso-capa" viewBox="0 0 300 120" aria-hidden="true">
+      <g fill="currentColor" opacity=".62">
+        <g transform="translate(18 94)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
+          <rect x="5.6" y="-30" width="2.6" height="30"/></g>
+        <g transform="translate(56 78)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
+          <rect x="5.6" y="-30" width="2.6" height="30"/></g>
+        <g transform="translate(94 86)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
+          <rect x="5.6" y="-30" width="2.6" height="30"/>
+          <path d="M8.2 -30 C17 -25 19 -16 14 -9 C17 -19 13 -24 8.2 -26 Z"/></g>
+        <g transform="translate(136 62)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
+          <rect x="5.6" y="-30" width="2.6" height="30"/></g>
+        <g transform="translate(172 70)"><ellipse rx="7.4" ry="5.4" transform="rotate(-20)"/>
+          <rect x="5.6" y="-30" width="2.6" height="30"/>
+          <path d="M8.2 -30 C17 -25 19 -16 14 -9 C17 -19 13 -24 8.2 -26 Z"/></g>
       </g>
+      <g transform="translate(192 60) scale(0.56)" opacity=".9"><use href="#tamandua"/></g>
     </svg>
     <div class="contem">
       <span class="rotulo">
