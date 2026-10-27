@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfólio Reflexivo de Estágio Supervisionado — Licenciatura em Música</title>
+<meta name="description" content="Portfólio reflexivo de Estágio Supervisionado em Licenciatura em Música: relatos de observação, planos de aula, relatos das aulas ministradas e reflexões pedagógicas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Karla:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/estilo.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='78' font-size='78'>🌿</text></svg>">
+</head>
+<body>
+
+<!-- ═══ Biblioteca de ilustrações ═══════════════════════════════════
+     O tamanduá e os símbolos musicais ficam aqui como <symbol> e são
+     reaproveitados pelo site inteiro com <use>. Traço fino, sem
+     preenchimento chapado: delicado, não infantil.
+     ═══════════════════════════════════════════════════════════════ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+
+    <!-- Tamanduá de perfil: focinho longo, dorso arqueado, cauda em pluma.
+         Silhueta cheia — a figura se reconhece mesmo com 40px de altura. -->
+    <symbol id="tamandua" viewBox="0 0 150 100">
+      <!-- A figura é montada com formas sobrepostas da mesma cor: elas se
+           fundem numa silhueta só e as proporções ficam previsíveis. -->
+      <g fill="currentColor">
+        <!-- cauda em pluma -->
+        <path opacity=".55" d="M104 44 C116 28 130 14 148 8
+          C143 24 138 38 136 50 C134 64 128 75 118 81
+          C112 73 108 60 104 44 Z"/>
+        <!-- patas -->
+        <rect x="77" y="68" width="8.5" height="21" rx="4.2"/>
+        <rect x="100" y="68" width="8.5" height="21" rx="4.2"/>
+        <!-- corpo -->
+        <ellipse cx="94" cy="56" rx="28" ry="24"/>
+        <!-- pescoço, ligando corpo e cabeça -->
+        <path d="M62 44 C72 34 86 32 96 38 L92 66 C80 66 68 58 62 52 Z"/>
+        <!-- cabeça -->
+        <circle cx="62" cy="48" r="14"/>
+        <!-- orelha -->
+        <circle cx="68" cy="35" r="5.4"/>
+        <!-- focinho, afinando até a ponta -->
+        <path d="M57 36 C42 49 24 66 9 76 C6 78 7 83 11 83
+                 C28 76 50 62 64 52 Z"/>
+      </g>
+      <!-- faixa clara do ombro, marca do tamanduá-bandeira -->
+      <path fill="#FFFFFF" opacity=".38" d="M70 42 L79 39 L104 70 L95 74 Z"/>
+      <circle cx="60" cy="45" r="2.6" fill="#FFFFFF" opacity=".95"/>
+    </symbol>
+
+    <!-- Clave de sol simplificada -->
+    <symbol id="clave" viewBox="0 0 48 96">
+      <g fill="none" stroke="currentColor" stroke-width="3.4"
+         stroke-linecap="round" stroke-linejoin="round">
+        <path d="M24 86 C24 60 24 34 24 24 C24 14 29 8 34 10 C39 12 39 22 33 30
+                 C27 38 14 46 12 56 C10 66 18 73 26 71 C33 69 37 62 35 55"/>
+        <path d="M24 86 C24 92 20 94 17 92"/>
+      </g>
+    </symbol>
+
+    <!-- Par de colcheias -->
+    <symbol id="notas" viewBox="0 0 48 48">
+      <g fill="none" stroke="currentColor" stroke-width="3"
+         stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 36 V10 L38 6 V32"/>
+        <path d="M17 16 L38 12"/>
+      </g>
+      <ellipse cx="12" cy="37" rx="5.6" ry="4.4" fill="currentColor" transform="rotate(-18 12 37)"/>
+      <ellipse cx="33" cy="33" rx="5.6" ry="4.4" fill="currentColor" transform="rotate(-18 33 33)"/>
+    </symbol>
+
+    <!-- Folha, para o lado "natureza" -->
+    <symbol id="folha" viewBox="0 0 48 48">
+      <g fill="none" stroke="currentColor" stroke-width="3"
+         stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 38 C10 20 24 8 40 8 C40 24 28 38 10 38 Z"/>
+        <path d="M10 38 C18 30 27 22 36 15"/>
+      </g>
+    </symbol>
+
+    <!-- Documento -->
+    <symbol id="doc" viewBox="0 0 48 48">
+      <g fill="none" stroke="currentColor" stroke-width="3"
+         stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 6 H28 L36 14 V42 H12 Z"/>
+        <path d="M28 6 V14 H36"/>
+        <path d="M18 24 H30 M18 32 H30"/>
+      </g>
+    </symbol>
+
+  </defs>
+</svg>
+
+<!-- ═══ Faixa da área administrativa (só aparece logada) ═══ -->
+<div id="painel" class="painel oculto" role="status"></div>
+
+<!-- ═══ Topo ═══ -->
+<header class="topo">
+  <div class="topo-in">
+    <a class="marca" href="#/inicio">
+      <svg viewBox="0 0 128 96" style="color:var(--medio-f)" aria-hidden="true"><use href="#tamandua"/></svg>
+      <span>
+        <b>Portfólio de Estágio</b>
+        <span>Licenciatura em Música</span>
+      </span>
+    </a>
+    <button class="hamburguer" id="bt-menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
+      <span></span>
+    </button>
+    <nav aria-label="Menu principal">
+      <ul class="menu" id="menu"></ul>
+    </nav>
+  </div>
+</header>
+
+<main id="conteudo" tabindex="-1"></main>
+
+<footer class="rodape">
+  <div class="contem">
+    <svg viewBox="0 0 128 96" style="color:var(--medio)" aria-hidden="true"><use href="#tamandua"/></svg>
+    <span>Portfólio Reflexivo de Estágio Supervisionado · Licenciatura em Música</span>
+    <a href="#/admin" id="link-admin">Área administrativa</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/dados.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
