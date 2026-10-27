@@ -101,7 +101,7 @@ function renderDocumentos (lista) {
   const docs = (lista || []).filter(d => d.url && d.nome)
   if (!docs.length) return `<div class="aviso"><b>Ainda sem documentos</b>
     A ficha de frequência e a ficha de avaliação assinadas aparecerão aqui
-    assim que forem enviadas pela área administrativa.</div>`
+    assim que forem adicionadas ao portfólio.</div>`
   return `<div class="docs">` + docs.map(d => `
     <div class="doc">
       <div class="ic" style="color:var(--medio-f)">
@@ -208,7 +208,7 @@ function pagIndice (s) {
     <div class="cartao corpo">
       ${renderBlocos(d.blocos) || vazioAviso({
         titulo: 'Introdução desta seção',
-        texto: 'O texto de abertura desta seção será inserido pela área administrativa.',
+        texto: 'O texto de abertura desta seção ainda será escrito.',
       })}
     </div>
     <h3 class="sub">Acessar</h3>
@@ -238,7 +238,7 @@ function pagSimples (s) {
     <div class="cartao corpo">
       ${temConteudo ? partes + corpo : vazioAviso({
         titulo: 'Conteúdo a inserir',
-        texto: 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos, que serão adicionados pela área administrativa.',
+        texto: 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos.',
       })}
     </div>
   </div></div>`
@@ -258,7 +258,7 @@ function pagBibliografia (s) {
       }).join('') + `</ol>`
     : vazioAviso({
         titulo: 'Referências',
-        texto: 'As referências serão cadastradas pela área administrativa, em formato ABNT, e aparecem aqui ordenadas alfabeticamente de forma automática.',
+        texto: 'As referências ainda serão cadastradas. Elas aparecem aqui ordenadas alfabeticamente de forma automática.',
       })
 
   return `<div class="contem"><div class="pagina">

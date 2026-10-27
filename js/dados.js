@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════
 //  Estrutura do portfólio: quais páginas existem, quais campos cada
 //  uma tem e o que aparece no menu. Nada de conteúdo aqui — o
-//  conteúdo vive no banco e é escrito pela área administrativa.
+//  conteúdo fica em js/conteudo.js.
 // ═══════════════════════════════════════════════════════════════════
 
 // Campos de identificação da capa. Rótulo + dica, nenhum valor.
