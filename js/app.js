@@ -490,7 +490,7 @@ document.addEventListener('click', (e) => {
   const fim = (abrindo ? el.scrollHeight : sum.offsetHeight) + borda
   el.style.overflow = 'hidden'
   const anim = el.animate({ height: [ini + 'px', fim + 'px'] },
-    { duration: Math.min(520, 240 + Math.abs(fim - ini) * 0.25), easing: 'cubic-bezier(.22,.8,.3,1)' })
+    { duration: Math.min(1100, 650 + Math.abs(fim - ini) * 0.35), easing: 'cubic-bezier(.45,.05,.25,1)' })
   el._anim = anim
   anim.onfinish = () => { if (!abrindo) el.open = false; el.style.overflow = ''; el._anim = null }
   anim.oncancel = () => { el._anim = null }
