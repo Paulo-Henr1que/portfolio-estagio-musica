@@ -424,3 +424,16 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
   .hamburguer{ width:42px; height:42px; flex:none; }
   .menu{ inset:66px 0 auto 0; max-height:calc(100vh - 66px); }
 }
+
+/* ── Transição entre páginas ───────────────────────────────────── */
+#conteudo{ transition:opacity .22s ease, transform .22s ease; }
+#conteudo.saindo{ opacity:0; transform:translateY(-10px); }
+#conteudo.entrando > *{ animation:entrar .55s cubic-bezier(.22,.8,.3,1) both; }
+#conteudo.entrando > *:nth-child(2){ animation-delay:.07s }
+#conteudo.entrando > *:nth-child(3){ animation-delay:.14s }
+#conteudo.entrando > *:nth-child(4){ animation-delay:.21s }
+#conteudo.entrando > *:nth-child(n+5){ animation-delay:.28s }
+@keyframes entrar{ from{ opacity:0; transform:translateY(18px) } to{ opacity:1; transform:none } }
+@media (prefers-reduced-motion: reduce){
+  #conteudo, #conteudo.entrando > *{ transition:none; animation:none; }
+}

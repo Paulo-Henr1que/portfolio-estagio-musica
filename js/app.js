@@ -365,7 +365,24 @@ function rota () {
   return (location.hash.replace(/^#\/?/, '') || 'inicio').split('?')[0]
 }
 
+// Transição entre páginas: a atual some suave, o conteúdo troca e a
+// nova entra subindo de leve, com os blocos aparecendo em sequência.
+const calmo = window.matchMedia('(prefers-reduced-motion: reduce)')
+let primeira = true, saindo = null
 function render () {
+  if (primeira || calmo.matches) { primeira = false; trocar(); return }
+  clearTimeout(saindo)
+  el.classList.remove('entrando')
+  el.classList.add('saindo')
+  saindo = setTimeout(() => {
+    trocar()
+    el.classList.remove('saindo')
+    void el.offsetWidth
+    el.classList.add('entrando')
+  }, 220)
+}
+
+function trocar () {
   const id = rota()
 
   const s = window.secao(id)
