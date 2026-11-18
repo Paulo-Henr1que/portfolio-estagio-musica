@@ -29,10 +29,20 @@ function montarMenu () {
     bt.setAttribute('aria-expanded', String(aberto))
     bt.setAttribute('aria-label', aberto ? 'Fechar menu' : 'Abrir menu')
   })
+  // toque fora do menu ou Esc fecham o menu aberto
+  document.addEventListener('click', (e) => {
+    if (ul.classList.contains('aberto') && !ul.contains(e.target) && !bt.contains(e.target)) {
+      ul.classList.remove('aberto'); bt.setAttribute('aria-expanded', 'false'); bt.setAttribute('aria-label', 'Abrir menu')
+    }
+  })
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && ul.classList.contains('aberto')) { bt.click(); bt.focus() }
+  })
   ul.addEventListener('click', (e) => {
     if (e.target.tagName === 'A') {
       ul.classList.remove('aberto')
       bt.setAttribute('aria-expanded', 'false')
+      bt.setAttribute('aria-label', 'Abrir menu')
     }
   })
 }
