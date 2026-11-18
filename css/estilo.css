@@ -563,3 +563,4 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 .video-barra a{ margin-left:auto; font-size:13.5px; color:var(--tinta-2); text-decoration:none;
   border-bottom:1px dotted var(--claro); transition:color .2s; }
 .video-barra a:hover{ color:var(--escuro); }
+.video video{ width:100%; max-height:72vh; background:#111; object-fit:contain; border-radius:12px; }
