@@ -499,3 +499,14 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 .topo-x svg{ width:11px; height:11px; }
 .topo-x:hover{ opacity:1; background:var(--pastel); }
 .topo-x::after{ content:""; position:absolute; inset:-10px; } /* área de toque maior */
+
+/* ── Fundo animado de figuras rítmicas (só nas áreas verdes) ───── */
+.fundo-notas{ position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+.fundo-notas i{ position:absolute; inset:-960px; background-repeat:repeat; will-change:transform; }
+.fundo-notas i:nth-child(1){ opacity:.14; background-size:960px; animation:notas-a 150s linear infinite; }
+.fundo-notas i:nth-child(2){ opacity:.08; background-size:720px; background-position:300px 210px;
+  animation:notas-b 200s linear infinite; }
+@keyframes notas-a{ to{ transform:translate(960px, -960px) } }
+@keyframes notas-b{ to{ transform:translate(-720px, -720px) } }
+#conteudo, .rodape{ position:relative; z-index:1; }
+@media (prefers-reduced-motion: reduce){ .fundo-notas i{ animation:none !important; } }
