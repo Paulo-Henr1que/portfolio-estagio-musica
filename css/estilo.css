@@ -461,3 +461,12 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
   .menu, .menu li, .hamburguer span, .hamburguer span::before, .hamburguer span::after{ transition:none !important; }
   #conteudo, #conteudo.entrando > *{ transition:none; animation:none; }
 }
+
+/* ── Créditos do rodapé ────────────────────────────────────────── */
+.rodape .rodape-base{ margin-top:22px; padding-top:18px; border-top:1px solid var(--borda);
+  justify-content:space-between; gap:8px 24px; font-size:13.5px; color:var(--medio-f); }
+.rodape .rodape-base a{ margin-left:0; display:inline-flex; align-items:center; gap:6px;
+  color:var(--escuro); transition:color .2s; }
+.rodape .rodape-base a:hover{ color:var(--medio); text-decoration:underline; text-underline-offset:3px; }
+.rodape .rodape-base svg{ width:15px; height:15px; opacity:1; }
+@media (max-width:640px){ .rodape .rodape-base{ flex-direction:column; align-items:flex-start; } }
