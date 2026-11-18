@@ -578,7 +578,7 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 .dobra > summary:hover .dobra-seta{ background:var(--claro); }
 .dobra-corpo{ padding:0 22px 20px; }
 .dobra[open] .dobra-corpo{ animation:dobra-abrir .35s cubic-bezier(.22,.8,.3,1); }
-@keyframes dobra-abrir{ from{ opacity:0; transform:translateY(-6px) } to{ opacity:1; transform:none } }
+@keyframes dobra-abrir{ from{ opacity:0 } to{ opacity:1 } }
 .dobra-corpo > :first-child{ margin-top:0; }
 .dobra-corpo figure:last-child, .dobra-corpo p:last-child{ margin-bottom:0; }
 .corpo > p + .dobra{ margin-top:6px; }

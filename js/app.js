@@ -476,6 +476,26 @@ function renderDobras (blocos) {
   }).join('')
 }
 
+// Abre e fecha as seções animando a altura, em vez de pular de uma vez.
+document.addEventListener('click', (e) => {
+  const sum = e.target.closest('details.dobra > summary')
+  if (!sum || calmo.matches || !sum.parentElement.animate) return
+  e.preventDefault()
+  const el = sum.parentElement
+  if (el._anim) el._anim.cancel()
+  const ini = el.offsetHeight
+  const abrindo = !el.open
+  if (abrindo) el.open = true
+  const borda = el.offsetHeight - el.clientHeight
+  const fim = (abrindo ? el.scrollHeight : sum.offsetHeight) + borda
+  el.style.overflow = 'hidden'
+  const anim = el.animate({ height: [ini + 'px', fim + 'px'] },
+    { duration: Math.min(520, 240 + Math.abs(fim - ini) * 0.25), easing: 'cubic-bezier(.22,.8,.3,1)' })
+  el._anim = anim
+  anim.onfinish = () => { if (!abrindo) el.open = false; el.style.overflow = ''; el._anim = null }
+  anim.oncancel = () => { el._anim = null }
+})
+
 function pagSimples (s) {
   if (window.PLANOS && window.PLANOS[s.id]) return pagPlano(s, window.PLANOS[s.id])
   const d = dados(s.id)
