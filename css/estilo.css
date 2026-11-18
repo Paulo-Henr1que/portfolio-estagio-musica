@@ -554,13 +554,7 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 
 /* ── Vídeos: saltos de 5 s e link do Drive ─────────────────────── */
 .video-barra{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
-.video-barra button{ display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:999px;
-  border:1px solid var(--borda); background:var(--branco); color:var(--escuro); font:inherit; font-size:14px;
-  font-weight:600; cursor:pointer; transition:background .2s, transform .15s; }
-.video-barra button:hover{ background:var(--pastel); }
-.video-barra button:active{ transform:scale(.95); }
-.video-barra svg{ width:17px; height:17px; }
-.video-barra a{ margin-left:auto; font-size:13.5px; color:var(--tinta-2); text-decoration:none;
+.video-barra a{ margin-left:auto; margin-top:0; font-size:13.5px; color:var(--tinta-2); text-decoration:none;
   border-bottom:1px dotted var(--claro); transition:color .2s; }
 .video-barra a:hover{ color:var(--escuro); }
 .video video{ width:100%; max-height:72vh; background:#111; object-fit:contain; border-radius:12px; }

@@ -67,17 +67,6 @@ const dados = (id) => {
 }
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
-const ICONE_VOLTAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-const ICONE_AVANCAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-
-// botões de voltar/avançar 5 segundos embaixo de cada vídeo
-document.addEventListener('click', (e) => {
-  const bt = e.target.closest('[data-pular]')
-  if (!bt) return
-  const v = bt.closest('figure').querySelector('video')
-  const novo = v.currentTime + Number(bt.dataset.pular)
-  v.currentTime = Math.max(0, Math.min(isFinite(v.duration) ? v.duration : novo, novo))
-})
 function renderBloco (b) {
   if (!b || !b.tipo) return ''
   const leg = b.legenda ? `<figcaption>${esc(b.legenda)}</figcaption>` : ''
@@ -107,8 +96,6 @@ function renderBloco (b) {
       return `<figure class="video"><video src="${esc(b.url)}" controls preload="metadata" playsinline
               ${b.poster ? `poster="${esc(b.poster)}"` : ''}></video>
         <div class="video-barra">
-          <button type="button" data-pular="-5" aria-label="Voltar 5 segundos">${ICONE_VOLTAR}<span>5s</span></button>
-          <button type="button" data-pular="5" aria-label="Avançar 5 segundos"><span>5s</span>${ICONE_AVANCAR}</button>
           ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>` : ''}
         </div>${leg}</figure>`
     default:
