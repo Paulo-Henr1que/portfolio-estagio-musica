@@ -267,10 +267,10 @@ function pagInicio (s) {
 
   <div class="contem">
     <div class="pagina">
-      <h3 class="sub">Identificação</h3>
+      <h3 class="sub fig fig-1">Identificação</h3>
       <dl class="ident">${campos}</dl>
 
-      <h3 class="sub">Sobre este portfólio</h3>
+      <h3 class="sub fig fig-2">Sobre este portfólio</h3>
       <div class="cartao corpo">
         ${renderBlocos(d.blocos) || vazioAviso({
           titulo: 'Texto de apresentação',
@@ -278,10 +278,10 @@ function pagInicio (s) {
         })}
       </div>
 
-      <h3 class="sub">Documentos do estágio</h3>
+      <h3 class="sub fig fig-3">Documentos do estágio</h3>
       ${renderDocumentos(d.documentos)}
 
-      <h3 class="sub">Seções do portfólio</h3>
+      <h3 class="sub fig fig-4">Seções do portfólio</h3>
       ${atalhos}
     </div>
   </div>`
