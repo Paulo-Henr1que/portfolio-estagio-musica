@@ -425,10 +425,25 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
 /* barra final, como a que encerra uma partitura */
 .rodape::before{ content:""; position:absolute; left:0; right:0; top:3px;
                  height:3px; background:var(--claro); }
-.rodape .contem{ display:flex; align-items:center; gap:18px; flex-wrap:wrap;
-                 font-size:13.5px; color:var(--tinta-2); }
-.rodape svg{ width:34px; height:34px; opacity:.75; flex:none; }
-.rodape a{ color:var(--medio-f); margin-left:auto; text-decoration:none; font-weight:600; }
+.rodape .contem{ display:flex; align-items:center; justify-content:space-between;
+                 gap:12px 24px; flex-wrap:wrap; font-size:13.5px; color:var(--tinta-2); }
+.rodape a{ color:var(--escuro); text-decoration:none; font-weight:600; transition:color .2s; }
+.rodape a:hover{ color:var(--medio); }
+.rodape-marca{ display:flex; align-items:center; gap:14px; min-width:0; }
+.rodape-marca svg{ width:44px; height:44px; color:var(--medio); flex:none; }
+.rodape-marca b{ display:block; font-family:var(--serif); font-size:20px; font-weight:600; color:var(--escuro); line-height:1.2; }
+.rodape-marca span{ display:block; font-size:13px; color:var(--medio-f); margin-top:2px; }
+.rodape-topo-link{ font-size:13.5px; padding:8px 14px; border:1px solid var(--borda); border-radius:999px; }
+.rodape-topo-link:hover{ background:var(--pastel); }
+.rodape .rodape-base{ margin-top:24px; padding-top:20px; border-top:1px solid var(--borda); color:var(--medio-f); font-size:13px; }
+.rodape-base a{ display:inline-flex; align-items:center; gap:6px; }
+.rodape-base svg{ width:15px; height:15px; }
+@media (max-width:640px){
+  .rodape{ padding:28px 0; }
+  .rodape .contem{ flex-direction:column; align-items:flex-start; }
+  .rodape .rodape-base{ gap:6px; }
+  .rodape .contem > *{ max-width:100%; }
+}
 
 .legenda-galeria{ font-size:13.5px; color:var(--tinta-2); margin:-12px 0 24px;
                   padding-left:13px; border-left:2px solid var(--claro); line-height:1.5; }
@@ -462,11 +477,3 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
   #conteudo, #conteudo.entrando > *{ transition:none; animation:none; }
 }
 
-/* ── Créditos do rodapé ────────────────────────────────────────── */
-.rodape .rodape-base{ margin-top:22px; padding-top:18px; border-top:1px solid var(--borda);
-  justify-content:space-between; gap:8px 24px; font-size:13.5px; color:var(--medio-f); }
-.rodape .rodape-base a{ margin-left:0; display:inline-flex; align-items:center; gap:6px;
-  color:var(--escuro); transition:color .2s; }
-.rodape .rodape-base a:hover{ color:var(--medio); text-decoration:underline; text-underline-offset:3px; }
-.rodape .rodape-base svg{ width:15px; height:15px; opacity:1; }
-@media (max-width:640px){ .rodape .rodape-base{ flex-direction:column; align-items:flex-start; } }
