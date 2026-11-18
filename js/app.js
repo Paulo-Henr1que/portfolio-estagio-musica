@@ -426,6 +426,56 @@ async function desenharPdfs () {
   }
 }
 
+// ── Relatos em seções retráteis ────────────────────────────────────
+// Cada subtítulo (as turmas, "Apresentações") vira uma seção que abre e
+// fecha; fotos e vídeos soltos vão para uma seção própria, fechada.
+// Assim a página começa curta e a pessoa abre só o que quer ler.
+const MIDIA = ['imagem', 'galeria', 'video']
+const contaMidia = (bs) => bs.reduce((t, b) =>
+  t + (b.tipo === 'galeria' ? (b.itens || []).length : MIDIA.includes(b.tipo) ? 1 : 0), 0)
+
+function dobra (titulo, conteudo, extra, aberta) {
+  return `<details class="dobra"${aberta ? ' open' : ''}>
+    <summary><span class="dobra-tit">${esc(titulo)}</span>
+      ${extra ? `<span class="dobra-extra">${esc(extra)}</span>` : ''}
+      <span class="dobra-seta" aria-hidden="true"></span></summary>
+    <div class="dobra-corpo">${conteudo}</div>
+  </details>`
+}
+
+function renderDobras (blocos) {
+  const grupos = []
+  let atual = { titulo: null, itens: [] }
+  const midias = []
+  for (const b of (blocos || [])) {
+    if (b.tipo === 'subtitulo') { grupos.push(atual); atual = { titulo: b.texto, itens: [] }; continue }
+    // mídia solta no meio do texto das turmas vai para "Fotos e vídeos"
+    if (MIDIA.includes(b.tipo) && (!atual.titulo || /^Turma/.test(atual.titulo))) { midias.push(b); continue }
+    atual.itens.push(b)
+  }
+  grupos.push(atual)
+  if (midias.length) grupos.push({ titulo: 'Fotos e vídeos', itens: midias })
+
+  let primeira = true
+  return grupos.filter(g => g.itens.length).map(g => {
+    if (!g.titulo) {
+      // texto sem subtítulo: primeiro parágrafo à vista, o resto recolhido
+      const txt = g.itens.filter(b => b.tipo === 'texto').map(b => b.texto).join('\n\n')
+      const ps = txt.split(/\n{2,}/).filter(p => p.trim())
+      if (ps.length <= 1) return renderBlocos(g.itens)
+      const html = paragrafos(ps[0]) + dobra('Continuar lendo', paragrafos(ps.slice(1).join('\n\n')), '', false)
+      primeira = false
+      return html
+    }
+    const n = contaMidia(g.itens)
+    const ehMidia = g.itens.every(b => MIDIA.includes(b.tipo))
+    const extra = ehMidia ? n + (n === 1 ? ' item' : ' itens') : ''
+    const html = dobra(g.titulo, renderBlocos(g.itens), extra, primeira && !ehMidia)
+    primeira = false
+    return html
+  }).join('')
+}
+
 function pagSimples (s) {
   if (window.PLANOS && window.PLANOS[s.id]) return pagPlano(s, window.PLANOS[s.id])
   const d = dados(s.id)
@@ -436,7 +486,7 @@ function pagSimples (s) {
   const partes = (s.partes || []).map(([k, rot]) =>
     vazio(d[k]) ? '' : `<h3 class="sub">${esc(rot)}</h3>${paragrafos(d[k])}`).join('')
 
-  const corpo = renderBlocos(d.blocos)
+  const corpo = s.pai === 'relatos' ? renderDobras(d.blocos) : renderBlocos(d.blocos)
   const temConteudo = partes || corpo
 
   return `<div class="contem"><div class="pagina">
