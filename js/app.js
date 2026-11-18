@@ -275,7 +275,7 @@ function resumoSecao (s) {
     observacoes: 'Três relatos das semanas de observação.',
     planos: 'Os sete planos de aula corrigidos.',
     relatos: 'Os sete relatos das aulas ministradas.',
-    consideracoes: 'Reflexão final sobre a experiência do estágio.',
+    consideracoes: 'Reflexão sobre a experiência do estágio.',
     bibliografia: 'Referências utilizadas ao longo do portfólio.',
   }
   return r[s.id] || ''

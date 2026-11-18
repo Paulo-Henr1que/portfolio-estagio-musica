@@ -23,16 +23,16 @@ window.CONTEUDO = {
   // ── Início ──────────────────────────────────────────────────
   'inicio': {
     titulo: '',             // título do trabalho
-    universidade: '',       // Universidade
-    curso: '',              // Curso
-    disciplina: '',         // Disciplina / componente curricular
-    estudante: '',          // Estudante
-    orientador: '',         // Professor(a) orientador(a)
-    supervisor: '',         // Professor(a) supervisor(a)
-    escola: '',             // Escola
-    cidade: '',             // Cidade
-    estado: '',             // Estado
-    ano: '',                // Ano
+    universidade: 'Universidade de Brasília',       // Universidade
+    curso: 'Licenciatura em Música',              // Curso
+    disciplina: 'Estágio Supervisionado em Música 1',         // Disciplina / componente curricular
+    estudante: 'Ana Luisa Barreto de Freitas',          // Estudante
+    orientador: 'Dra. Jéssica de Almeida',         // Professor(a) orientador(a)
+    supervisor: 'Hélio Ferreira Barreto',         // Professor(a) supervisor(a)
+    escola: 'Centro de Ensino Fundamental (CEF) Tamanduá',             // Escola
+    cidade: 'Zona rural do Gama',             // Cidade
+    estado: 'DF',             // Estado
+    ano: '2026.2',                // Ano
     blocos: [
       // { tipo: 'subtitulo', texto: '' },
       { tipo: 'texto', texto: `` },
