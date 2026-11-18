@@ -586,3 +586,17 @@ figcaption{ font-size:13.5px; color:var(--tinta-2); margin-top:9px; line-height:
   .dobra > summary{ padding:14px 16px; } .dobra-corpo{ padding:0 16px 16px; } .dobra-tit{ font-size:20px; }
 }
 @media (prefers-reduced-motion: reduce){ .dobra[open] .dobra-corpo{ animation:none; } .dobra-seta{ transition:none; } }
+
+/* ── Texto justificado (bordas alinhadas dos dois lados) ───────── */
+/* Hifenização em português evita os buracos entre palavras que o
+   justificado cria, principalmente nas colunas estreitas do celular. */
+.corpo p{ text-align:justify; hyphens:auto; -webkit-hyphens:auto; hyphenate-limit-chars:6 3 3; }
+.dobra-corpo p{ max-width:none; }
+/* Parágrafos ocupam toda a largura do cartão (sem sobra à direita). */
+.corpo p, .corpo blockquote{ max-width:none; }
+/* Nos relatos as seções já são caixas: o cartão de fora some, sem
+   "caixa dentro de caixa" roubando largura no celular. */
+.cartao.com-dobras{ background:none; border:0; box-shadow:none; padding:0; }
+.cartao.com-dobras > p{ background:var(--branco); border:1px solid var(--borda); border-radius:12px; padding:18px 22px; margin:0 0 14px; }
+@media (min-width:900px){ .cartao.com-dobras > p{ padding:22px 30px; } }
+@media (min-width:900px){ .dobra-corpo{ padding:0 30px 26px; } .dobra > summary{ padding:18px 30px; } }

@@ -516,7 +516,7 @@ function pagSimples (s) {
       <h2 class="titulo">${esc(titulo)}</h2>
     </header>
     ${renderCampos(s.campos, d)}
-    <div class="cartao corpo">
+    <div class="cartao corpo${s.pai === 'relatos' && temConteudo ? ' com-dobras' : ''}">
       ${temConteudo ? partes + corpo : vazioAviso({
         titulo: 'Conteúdo a inserir',
         texto: 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos.',
