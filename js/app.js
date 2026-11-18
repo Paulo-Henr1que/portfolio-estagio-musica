@@ -434,24 +434,18 @@ document.addEventListener('click', (e) => {
 
 // ── Início ─────────────────────────────────────────────────────────
 // ── Voltar ao topo (flutuante) ─────────────────────────────────────
-// Aparece depois que a pessoa desce bastante. O x esconde o botão e a
-// escolha fica guardada neste navegador.
+// Aparece depois que a pessoa desce bastante. O x esconde o botão só
+// nesta página: ao trocar de página pelo menu, ele volta.
 function montarTopo () {
   const box = document.getElementById('topo-flut')
   let fechado = false
-  try { fechado = localStorage.getItem('topo-fechado') === '1' } catch (e) {}
-  if (fechado) return
   box.hidden = false
-  const ver = () => box.classList.toggle('visivel', window.scrollY > window.innerHeight * 1.2)
+  const ver = () => box.classList.toggle('visivel', !fechado && window.scrollY > window.innerHeight * 1.2)
   window.addEventListener('scroll', ver, { passive: true }); ver()
+  window.addEventListener('hashchange', () => { fechado = false; setTimeout(ver, 400) })
   box.querySelector('.topo-ir').addEventListener('click', () =>
     window.scrollTo({ top: 0, behavior: calmo.matches ? 'auto' : 'smooth' }))
-  box.querySelector('.topo-x').addEventListener('click', () => {
-    box.classList.remove('visivel')
-    setTimeout(() => { box.hidden = true }, 350)
-    window.removeEventListener('scroll', ver)
-    try { localStorage.setItem('topo-fechado', '1') } catch (e) {}
-  })
+  box.querySelector('.topo-x').addEventListener('click', () => { fechado = true; ver() })
 }
 
 ;(function iniciar () {
