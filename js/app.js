@@ -59,7 +59,12 @@ function marcarMenu (id) {
 
 // ── Leitura do conteúdo ────────────────────────────────────────────
 // Tudo vem de js/conteudo.js, carregado junto com a página.
-const dados = (id) => (window.CONTEUDO && window.CONTEUDO[id]) || {}
+const dados = (id) => {
+  const base = (window.CONTEUDO && window.CONTEUDO[id]) || {}
+  const p = window.PLANOS && window.PLANOS[id]
+  if (!p) return base
+  return { ...base, titulo: p.titulo, data: p.data }
+}
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
 function renderBloco (b) {
@@ -319,7 +324,106 @@ function pagIndice (s) {
   </div></div>`
 }
 
+// ── Plano de aula ──────────────────────────────────────────────────
+// Cada plano exibe o próprio PDF, desenhado na página pelo pdf.js (assim
+// aparece igual no computador e no celular). Plano e relato da mesma
+// aula se ligam por um botão ("ponte") nos dois sentidos.
+const seta = (dir) => dir === 'dir'
+  ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+function ponte (n, para) {
+  const plano = para === 'plano'
+  const alvo = (plano ? 'plano-' : 'relato-') + n
+  const ad = dados(alvo)
+  const nome = plano ? 'Plano de Aula ' + n : 'Relato de Aula ' + n
+  return `<a class="ponte ${plano ? 'volta' : ''}" href="#/${alvo}">
+    <span class="ponte-ic">${plano ? seta('esq') : seta('dir')}</span>
+    <span class="ponte-txt"><small>${plano ? 'Ver o planejamento desta aula' : 'Ver como esta aula aconteceu'}</small>
+      <b>${nome}</b>${!vazio(ad.titulo) && ad.titulo !== nome ? `<em>${esc(ad.titulo)}</em>` : ''}</span>
+  </a>`
+}
+
+function vizinhos (s) {
+  const irm = window.secao(s.pai).filhos
+  const i = irm.findIndex(f => f.id === s.id)
+  const ant = irm[i - 1], prox = irm[i + 1]
+  return `<nav class="vizinhos" aria-label="Navegar entre páginas">
+    ${ant ? `<a href="#/${ant.id}">${seta('esq')} ${esc(ant.titulo)}</a>` : '<span></span>'}
+    ${prox ? `<a href="#/${prox.id}">${esc(prox.titulo)} ${seta('dir')}</a>` : '<span></span>'}
+  </nav>`
+}
+
+function pagPlano (s, p) {
+  return `<div class="contem"><div class="pagina plano">
+    <header>
+      <p class="trilho"><a href="#/planos">Planos de Aula</a> <span>›</span> <span>${esc(s.titulo)}</span></p>
+      <h2 class="titulo">${esc(s.titulo)}</h2>
+      <p class="pl-sub">${esc(p.titulo)} · ${esc(p.data)}</p>
+    </header>
+    <div class="pl-doc" data-pdf="${esc(p.arquivo)}">
+      <div class="pl-folhas"><p class="pl-carregando">Carregando o plano…</p></div>
+    </div>
+    <p class="pl-links">
+      <a href="${esc(p.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>
+    </p>
+    ${ponte(s.ordem, 'relato')}
+    ${vizinhos(s)}
+  </div></div>`
+}
+
+// Desenha as páginas do PDF em canvas, na largura do quadro.
+let pdfjsPronto = null
+function carregarPdfjs () {
+  if (pdfjsPronto) return pdfjsPronto
+  pdfjsPronto = new Promise((ok, erro) => {
+    const sc = document.createElement('script')
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
+    sc.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+      ok(window.pdfjsLib)
+    }
+    sc.onerror = erro
+    document.head.appendChild(sc)
+  })
+  return pdfjsPronto
+}
+
+async function desenharPdfs () {
+  const caixas = document.querySelectorAll('.pl-doc[data-pdf]:not(.pronto)')
+  if (!caixas.length) return
+  for (const caixa of caixas) {
+    caixa.classList.add('pronto')
+    const alvo = caixa.querySelector('.pl-folhas')
+    try {
+      const lib = await carregarPdfjs()
+      const doc = await lib.getDocument(caixa.dataset.pdf).promise
+      alvo.innerHTML = ''
+      const larg = alvo.clientWidth || 800
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5)
+      for (let n = 1; n <= doc.numPages; n++) {
+        const pg = await doc.getPage(n)
+        const base = pg.getViewport({ scale: 1 })
+        const vp = pg.getViewport({ scale: Math.max(larg * dpr, 1700) / base.width })
+        const cv = document.createElement('canvas')
+        cv.width = vp.width; cv.height = vp.height
+        cv.setAttribute('role', 'img')
+        cv.setAttribute('aria-label', 'Página ' + n + ' do plano de aula')
+        cv.title = 'Toque para ampliar'
+        cv.addEventListener('click', () => abrirLupa(cv.toDataURL('image/png'), 'Plano de aula, página ' + n))
+        alvo.appendChild(cv)
+        await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise
+      }
+    } catch (e) {
+      alvo.innerHTML = `<p class="pl-carregando">Não foi possível exibir o arquivo aqui.
+        <a href="${esc(caixa.dataset.pdf)}" target="_blank" rel="noopener">Abrir o PDF</a></p>`
+    }
+  }
+}
+
 function pagSimples (s) {
+  if (window.PLANOS && window.PLANOS[s.id]) return pagPlano(s, window.PLANOS[s.id])
   const d = dados(s.id)
   const pai = s.pai ? window.secao(s.pai) : null
   const titulo = vazio(d.titulo) ? s.titulo : d.titulo
@@ -344,6 +448,8 @@ function pagSimples (s) {
         texto: 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos.',
       })}
     </div>
+    ${s.pai === 'relatos' ? ponte(s.ordem, 'plano') : ''}
+    ${s.pai ? vizinhos(s) : ''}
   </div></div>`
 }
 
@@ -404,6 +510,7 @@ function trocar () {
   else if (s.filhos) el.innerHTML = pagIndice(s)
   else if (s.referencias) el.innerHTML = pagBibliografia(s)
   else el.innerHTML = pagSimples(s)
+  desenharPdfs()
 
   document.title = (s.id === 'inicio' ? '' : s.titulo + ' · ') +
     'Portfólio de Estágio · Licenciatura em Música'

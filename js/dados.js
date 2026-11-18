@@ -92,7 +92,7 @@ window.SECOES = [
   S('relatos', 'Relatos das Aulas', { menu: true, menuTitulo: 'Relatos de Aula', filhos: relatos }),
   ...relatos,
 
-  S('consideracoes', 'Minhas Considerações e Observações', { menu: true, menuTitulo: 'Considerações' }),
+  S('consideracoes', 'Minhas Reflexões e Observações', { menu: true, menuTitulo: 'Reflexões' }),
 
   { id: 'bibliografia', titulo: 'Bibliografia', menu: true, referencias: true },
 ]

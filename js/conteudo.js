@@ -363,7 +363,9 @@ window.CONTEUDO = {
     resumo: '',             // frase curta que aparece no cartão
     blocos: [
       // { tipo: 'subtitulo', texto: '' },
-      { tipo: 'texto', texto: `` },
+      { tipo: 'texto', texto: `Aqui estão reunidos os sete relatos de aula desenvolvidos ao longo do estágio supervisionado nas turmas de 5º ano (A e B). Os registros documentam o processo de ensino e aprendizagem musical aplicado em sala, partindo da leitura rítmica e da percepção de pulso até a exploração de gêneros musicais, instrumentos alternativos e performance em grupo.
+
+Cada relato evidencia as metodologias utilizadas, o comportamento e a assimilação dos conteúdos por parte dos estudantes, bem como as estratégias de adaptação pedagógica adotadas até a culminância artística do projeto.` },
       // { tipo: 'imagem', url: 'midia/arquivo.jpg', legenda: '', alt: '' },
       // { tipo: 'video',  url: 'midia/arquivo.mp4', legenda: '' },
       // { tipo: 'galeria', legenda: '', itens: [
