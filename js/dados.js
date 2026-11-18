@@ -8,7 +8,7 @@
 const IDENTIFICACAO = [
   ['universidade', 'Universidade'],
   ['curso',        'Curso'],
-  ['disciplina',   'Disciplina / componente curricular'],
+  ['disciplina',   'Disciplina'],
   ['estudante',    'Estudante'],
   ['orientador',   'Professor(a) orientador(a)'],
   ['supervisor',   'Professor(a) supervisor(a)'],
