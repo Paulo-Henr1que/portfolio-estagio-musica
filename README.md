@@ -3,9 +3,12 @@
 Site do portfólio de Estágio Supervisionado: relatos de observação, planos de aula,
 relatos das aulas ministradas, reflexão final, bibliografia e os documentos do estágio.
 
-O site é estático e fica hospedado no GitHub Pages, de graça. Não há banco de dados,
-não há login e não há mensalidade — **todo o conteúdo mora no arquivo
-[`js/conteudo.js`](js/conteudo.js)**, versionado junto com o código. Ele não some.
+O site fica no Vercel e tem um **painel de edição em `/admin`**: lá se entra com
+usuário e senha e se editam textos, fotos, vídeos, PDFs e links, com
+pré-visualização antes de publicar. Veja [Painel de edição](#painel-de-edição).
+
+O arquivo [`js/conteudo.js`](js/conteudo.js) continua valendo como reserva: o site
+usa o que foi publicado pelo painel e, se ainda não houver nada publicado, usa o arquivo.
 
 ---
 
@@ -130,14 +133,46 @@ páginas se adaptam sozinhas.
 
 ---
 
-## O que este site não faz
+## Painel de edição
 
-Por honestidade, e porque foi uma escolha consciente de simplicidade:
+Endereço: **`/admin`** do site (ex.: `https://seu-site.vercel.app/admin`).
 
-- **Não tem painel de edição nem login.** O conteúdo é escrito no arquivo e
-  enviado pelo Git.
-- **Não tem upload pelo navegador.** Os arquivos entram na pasta `midia/`.
-- **Não tem rascunho separado do publicado.** O que está no arquivo e enviado
-  ao GitHub está no ar. Para trabalhar sem publicar, use uma branch separada.
-- **Não tem negrito ou itálico dentro do parágrafo.** Há subtítulos e citações,
-  mas não formatação no meio do texto.
+- **Primeiro acesso:** usuário `admin`, senha `admin`. O painel avisa para trocar a senha.
+- **Mudar a senha:** menu da conta (canto superior direito) → *Mudar minha senha*.
+- **Outras pessoas:** menu da conta → *Quem pode editar* → usuário e senha inicial.
+- **Editar:** escolha a página, edite e clique em **Salvar e publicar**. Antes de publicar,
+  a pré-visualização mostra o próprio site com as alterações, no tamanho de computador e de celular.
+- Alterações não publicadas ficam guardadas no navegador se a aba fechar sem querer.
+- Fotos grandes são reduzidas antes de enviar; vídeos ganham uma capa automática.
+
+### Ativar no Vercel (uma vez só)
+
+No projeto do site no Vercel → aba **Storage**:
+
+1. **Create Database → Upstash for Redis** (plano grátis) → conectar ao projeto.
+   Guarda os textos, os usuários e as senhas (criptografadas).
+2. **Create Database → Blob** → conectar ao projeto.
+   Guarda as fotos, os vídeos e os PDFs enviados pelo painel (1 GB grátis).
+3. **Deployments → Redeploy**, para o site enxergar os dois.
+
+Opcional: variável de ambiente `SESSION_SECRET` com um texto longo e aleatório.
+Sem ela, o painel gera um segredo sozinho e guarda no Redis.
+
+### Testar no computador
+
+```bash
+npm install
+npm run dev
+```
+
+Site em `http://localhost:3000` e painel em `http://localhost:3000/admin/`. Sem as variáveis
+do Redis e do Blob, os dados ficam na memória e os envios vão para `midia/_local/`, só para teste.
+
+### Organização do painel
+
+```
+admin/                painel (index.html, admin.js, admin.css)
+admin/blob-client.js  envio de arquivos ao Vercel Blob (gerado com npm run build:blob)
+api/                  funções do Vercel: login, sair, eu, conteudo, senha, usuarios, upload
+scripts/              servidor local de teste
+```

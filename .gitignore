@@ -1,2 +1,6 @@
 _shot-*.png
 _tam.html
+node_modules
+.vercel
+.env*
+midia/_local

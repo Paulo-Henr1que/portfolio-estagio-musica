@@ -81,6 +81,16 @@ window.CONTEUDO = {
     ],
   },
 
+  // ── Introdução ──────────────────────────────────────────────
+  // Quatro tópicos. Deixe uma linha em branco entre os parágrafos.
+  'introducao': {
+    contexto_estagio: ``,   // Contexto do estágio
+    contexto_deste: ``,     // Contexto deste estágio
+    turmas: ``,             // As turmas
+    leituras: ``,           // Leituras e reflexões
+    blocos: [],             // fotos ou documentos extras, se quiser
+  },
+
   // ── Relatos de Observação ───────────────────────────────────
   'observacoes': {
     resumo: '',             // frase curta que aparece no cartão

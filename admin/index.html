@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel · Portfólio de Estágio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Karla:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../css/estilo.css?v=25">
+<link rel="stylesheet" href="admin.css?v=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='78' font-size='78'>🌿</text></svg>">
+</head>
+<body class="painel">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="tamandua" viewBox="0 0 150 100">
+      <g fill="currentColor">
+        <path opacity=".55" d="M104 44 C116 28 130 14 148 8 C143 24 138 38 136 50 C134 64 128 75 118 81 C112 73 108 60 104 44 Z"/>
+        <rect x="77" y="68" width="8.5" height="21" rx="4.2"/>
+        <rect x="100" y="68" width="8.5" height="21" rx="4.2"/>
+        <ellipse cx="94" cy="56" rx="28" ry="24"/>
+        <path d="M62 44 C72 34 86 32 96 38 L92 66 C80 66 68 58 62 52 Z"/>
+        <circle cx="62" cy="48" r="14"/>
+        <circle cx="68" cy="35" r="5.4"/>
+        <path d="M57 36 C42 49 24 66 9 76 C6 78 7 83 11 83 C28 76 50 62 64 52 Z"/>
+      </g>
+      <path fill="#FFFFFF" opacity=".38" d="M70 42 L79 39 L104 70 L95 74 Z"/>
+      <circle cx="60" cy="45" r="2.6" fill="#FFFFFF" opacity=".95"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ═══ Entrar ═══ -->
+<section class="entrar" id="tela-entrar" hidden>
+  <form class="entrar-cartao" id="form-entrar" novalidate>
+    <svg class="entrar-marca" viewBox="0 0 150 100" aria-hidden="true"><use href="#tamandua"/></svg>
+    <h1>Painel do portfólio</h1>
+    <p>Entre para editar os textos, as fotos, os vídeos e os documentos do site.</p>
+    <div class="erro" id="entrar-erro" hidden></div>
+    <label class="cx">Usuário
+      <input name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    </label>
+    <label class="cx">Senha
+      <span class="senha-cx">
+        <input name="senha" type="password" autocomplete="current-password" required>
+        <button type="button" class="ver-senha" aria-label="Mostrar senha">mostrar</button>
+      </span>
+    </label>
+    <button class="bt" type="submit">Entrar</button>
+    <a class="entrar-volta" href="../">← Voltar ao site</a>
+  </form>
+</section>
+
+<!-- ═══ Painel ═══ -->
+<div id="tela-painel" hidden>
+  <header class="p-topo">
+    <a class="marca" href="../" target="_blank" rel="noopener" title="Abrir o site">
+      <svg viewBox="0 0 128 96" style="color:var(--medio-f)" aria-hidden="true"><use href="#tamandua"/></svg>
+      <span><b>Painel do portfólio</b><span>Licenciatura em Música</span></span>
+    </a>
+    <div class="p-conta">
+      <button type="button" class="bt leve pequeno" id="bt-conta" aria-haspopup="true" aria-expanded="false">
+        <span class="avatar" id="conta-inicial">A</span> <span id="conta-nome">admin</span>
+      </button>
+      <div class="menu-conta" id="menu-conta" hidden>
+        <button type="button" data-acao="senha">Mudar minha senha</button>
+        <button type="button" data-acao="editores">Quem pode editar</button>
+        <a href="../" target="_blank" rel="noopener">Abrir o site ↗</a>
+        <button type="button" data-acao="sair" class="sair">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="faixa-aviso" id="aviso-senha" hidden>
+    Você está usando a senha padrão <b>admin</b>. <button type="button" data-acao="senha">Trocar agora</button>
+  </div>
+
+  <div class="p-corpo">
+    <nav class="p-lado" aria-label="Páginas do site">
+      <label class="p-escolha">Página
+        <select id="sel-secao"></select>
+      </label>
+      <ul id="lista-secoes"></ul>
+    </nav>
+    <main class="p-editor" id="editor" tabindex="-1"></main>
+  </div>
+
+  <footer class="p-barra" id="barra">
+    <span class="p-estado" id="estado">Tudo publicado.</span>
+    <div class="p-acoes">
+      <button type="button" class="bt leve" id="bt-descartar" hidden>Descartar</button>
+      <button type="button" class="bt leve" id="bt-previa">Pré-visualizar</button>
+      <button type="button" class="bt" id="bt-salvar" disabled>Salvar e publicar</button>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══ Pré-visualização ═══ -->
+<div class="previa-tela" id="previa" hidden role="dialog" aria-modal="true" aria-labelledby="previa-titulo">
+  <div class="previa-topo">
+    <div class="previa-tit">
+      <b id="previa-titulo">Pré-visualização</b>
+      <span id="previa-sub">Assim a página vai ficar. Nada foi publicado ainda.</span>
+    </div>
+    <div class="previa-tam" role="group" aria-label="Tamanho da tela">
+      <button type="button" data-tam="pc" aria-pressed="true">Computador</button>
+      <button type="button" data-tam="cel" aria-pressed="false">Celular</button>
+    </div>
+    <div class="previa-acoes">
+      <button type="button" class="bt leve" id="previa-voltar">Voltar e editar</button>
+      <button type="button" class="bt" id="previa-publicar">Publicar</button>
+    </div>
+  </div>
+  <div class="previa-palco"><iframe id="previa-quadro" title="Pré-visualização do site"></iframe></div>
+</div>
+
+<!-- ═══ Janelas ═══ -->
+<dialog class="janela" id="jan-senha">
+  <form method="dialog" id="form-senha" novalidate>
+    <h2>Mudar minha senha</h2>
+    <div class="erro" hidden></div><div class="ok" hidden></div>
+    <label class="cx">Senha atual <input type="password" name="atual" autocomplete="current-password"></label>
+    <label class="cx">Nova senha <input type="password" name="nova" autocomplete="new-password" minlength="5"></label>
+    <label class="cx">Repita a nova senha <input type="password" name="nova2" autocomplete="new-password"></label>
+    <div class="janela-acoes">
+      <button type="button" class="bt leve" data-fechar>Cancelar</button>
+      <button type="submit" class="bt" value="ok">Salvar senha</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="janela larga" id="jan-editores">
+  <div>
+    <h2>Quem pode editar</h2>
+    <p class="janela-dica">Todos os editores podem mudar o conteúdo do site e adicionar ou remover outros editores.</p>
+    <ul class="editores" id="lista-editores"></ul>
+    <form id="form-editor" class="novo-editor" novalidate>
+      <h3>Adicionar editor</h3>
+      <div class="erro" hidden></div><div class="ok" hidden></div>
+      <div class="duas">
+        <label class="cx">Usuário <input name="usuario" autocapitalize="none" spellcheck="false" placeholder="ex.: ana.luisa"></label>
+        <label class="cx">Senha inicial <input name="senha" type="text" autocomplete="off" placeholder="mínimo 5 caracteres"></label>
+      </div>
+      <p class="janela-dica">Passe o usuário e a senha para a pessoa. Ela pode trocar a senha depois, no próprio painel.</p>
+      <div class="janela-acoes">
+        <button type="button" class="bt leve" data-fechar>Fechar</button>
+        <button type="submit" class="bt">Adicionar</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog class="janela" id="jan-confirma">
+  <form method="dialog">
+    <h2 id="confirma-tit">Tem certeza?</h2>
+    <p id="confirma-txt"></p>
+    <div class="janela-acoes">
+      <button type="submit" class="bt leve" value="nao">Cancelar</button>
+      <button type="submit" class="bt risco" value="sim" id="confirma-sim">Remover</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="aviso-flut" id="aviso-flut" role="status" aria-live="polite" hidden></div>
+
+<script src="../js/dados.js?v=5"></script>
+<script src="../js/conteudo.js?v=6"></script>
+<script src="../js/planos.js?v=1"></script>
+<script type="module" src="admin.js?v=1"></script>
+</body>
+</html>

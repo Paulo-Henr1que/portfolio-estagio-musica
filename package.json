@@ -1,0 +1,16 @@
+{
+  "name": "portfolio-estagio-musica",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/servidor-local.mjs",
+    "build:blob": "esbuild scripts/entrada-blob.js --bundle --format=esm --minify --outfile=admin/blob-client.js"
+  },
+  "dependencies": {
+    "@upstash/redis": "1.41.1",
+    "@vercel/blob": "2.9.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

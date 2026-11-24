@@ -98,6 +98,17 @@ function renderBloco (b) {
         <div class="video-barra">
           ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>` : ''}
         </div>${leg}</figure>`
+    case 'pdf':
+      // Documento em PDF desenhado na página, no mesmo formato dos planos.
+      if (!b.url) return ''
+      return `<figure class="pdf-bloco">
+        <div class="pl-doc" data-pdf="${esc(b.url)}">
+          <div class="pl-folhas"><p class="pl-carregando">Carregando o documento…</p></div>
+        </div>
+        <p class="pl-links">
+          <a href="${esc(b.url)}" target="_blank" rel="noopener">Abrir o PDF ↗</a>
+          ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>` : ''}
+        </p>${leg}</figure>`
     default:
       return ''
   }
@@ -291,6 +302,7 @@ function resumoSecao (s) {
   const r = {
     biografia: 'Trajetória, formação e relação com a música.',
     escola: 'Caracterização e contexto da escola onde o estágio foi realizado.',
+    introducao: 'Contexto do estágio, as turmas e as leituras que acompanharam a prática.',
     observacoes: 'Três relatos das semanas de observação.',
     planos: 'Os sete planos de aula corrigidos.',
     relatos: 'Os sete relatos das aulas ministradas.',
@@ -527,6 +539,23 @@ function pagSimples (s) {
   </div></div>`
 }
 
+// Introdução: quatro tópicos fixos, cada um com o próprio título. Tópico
+// ainda sem texto mostra o que deve ser escrito ali.
+function pagIntroducao (s) {
+  const d = dados(s.id)
+  const topicos = s.topicos.map(([k, rot, dica], i) => `
+    <h3 class="sub fig fig-${i + 1}">${esc(rot)}</h3>
+    <div class="cartao corpo">
+      ${vazio(d[k]) ? vazioAviso({ titulo: 'A escrever', texto: dica }) : paragrafos(d[k])}
+    </div>`).join('')
+  const extra = renderBlocos(d.blocos)
+  return `<div class="contem"><div class="pagina introducao">
+    <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
+    ${topicos}
+    ${extra ? `<div class="cartao corpo">${extra}</div>` : ''}
+  </div></div>`
+}
+
 function pagBibliografia (s) {
   const d = dados('bibliografia')
   const refs = (d.referencias || []).filter(r => !vazio(r.texto))
@@ -583,6 +612,7 @@ function trocar () {
   if (s.id === 'inicio') el.innerHTML = pagInicio(s)
   else if (s.filhos) el.innerHTML = pagIndice(s)
   else if (s.referencias) el.innerHTML = pagBibliografia(s)
+  else if (s.topicos) el.innerHTML = pagIntroducao(s)
   else el.innerHTML = pagSimples(s)
   desenharPdfs()
 
@@ -629,10 +659,48 @@ function montarTopo () {
   box.querySelector('.topo-x').addEventListener('click', () => { fechado = true; ver() })
 }
 
-;(function iniciar () {
+// ── Conteúdo publicado pelo painel ─────────────────────────────────
+// O painel (/admin) salva no banco do Vercel. Se ainda não houver nada
+// salvo, ou se a consulta falhar, o site usa js/conteudo.js e
+// js/planos.js, que continuam valendo como reserva.
+function aplicarConteudo (d) {
+  if (!d || d.vazio || !d.conteudo) return
+  window.CONTEUDO = d.conteudo
+  if (d.planos) window.PLANOS = d.planos
+}
+
+async function buscarPublicado () {
+  if (location.protocol === 'file:') return
+  try {
+    const ctl = new AbortController()
+    const t = setTimeout(() => ctl.abort(), 4000)
+    const r = await fetch('/api/conteudo', { signal: ctl.signal, cache: 'no-store' })
+    clearTimeout(t)
+    if (r.ok) aplicarConteudo(await r.json())
+  } catch (e) { /* segue com o conteúdo dos arquivos */ }
+}
+
+// Pré-visualização: o painel abre o site num quadro com ?previa=1 e
+// manda o rascunho por mensagem. Nada é salvo; só se vê como fica.
+const PREVIA = new URLSearchParams(location.search).has('previa')
+
+;(async function iniciar () {
   montarTopo()
   montarMenu()
   window.addEventListener('hashchange', render)
+  if (PREVIA) {
+    document.documentElement.classList.add('previa')
+    window.addEventListener('message', (e) => {
+      if (e.origin !== location.origin || !e.data || e.data.tipo !== 'previa') return
+      aplicarConteudo(e.data)
+      const alvo = '#/' + (e.data.rota || 'inicio')
+      if (location.hash !== alvo) location.hash = alvo
+      else { const y = window.scrollY; trocar(); window.scrollTo(0, y) }
+    })
+    window.parent.postMessage({ tipo: 'previa-pronta' }, location.origin)
+    return
+  }
+  await buscarPublicado()
   render()
 })()
 

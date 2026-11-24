@@ -57,6 +57,18 @@ const CAMPOS_RELATO_AULA = [
   ['turma',  'Turma'],
 ]
 
+// Os quatro tópicos da Introdução: chave, título e o que escrever.
+const TOPICOS_INTRODUCAO = [
+  ['contexto_estagio', 'Contexto do estágio',
+    'Um ou dois parágrafos sobre o projeto de estágio e os outros níveis de estágio cursados: em que local, o que desenvolveu e o que aprendeu em cada um deles.'],
+  ['contexto_deste', 'Contexto deste estágio',
+    'Organização da disciplina de estágio e das atividades desenvolvidas, organização do estágio na escola campo, distribuição da carga horária, período em que ocorreu e a carga horária de cada atividade.'],
+  ['turmas', 'As turmas',
+    'As turmas em que o estágio foi realizado: número de alunos, faixa etária e informações gerais das semanas de observação, como a relação professor-aluno, a relação entre os alunos e os conteúdos desenvolvidos.'],
+  ['leituras', 'Leituras e reflexões',
+    'Breve relato sobre as atividades de leitura e reflexão sobre o estágio propostas pela equipe de professores do estágio.'],
+]
+
 // ── Montagem das seções ────────────────────────────────────────────
 const S = (id, titulo, extra = {}) => ({ id, titulo, blocos: true, ...extra })
 
@@ -82,6 +94,8 @@ window.SECOES = [
   S('biografia', 'Biografia', { menu: true }),
 
   S('escola', 'Dados da Escola', { menu: true, menuTitulo: 'A Escola', campos: CAMPOS_ESCOLA }),
+
+  S('introducao', 'Introdução', { menu: true, topicos: TOPICOS_INTRODUCAO }),
 
   S('observacoes', 'Relatos de Observação', { menu: true, menuTitulo: 'Observações', filhos: observacoes }),
   ...observacoes,
