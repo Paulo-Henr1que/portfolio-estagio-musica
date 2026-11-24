@@ -237,14 +237,6 @@ function desenharEditor () {
   if (s.id === 'inicio') partes.push(...editorInicio(s))
   else if (s.referencias) partes.push(editorBibliografia())
   else if (estado.planos[s.id]) partes.push(editorPlano(s))
-  else if (s.topicos) {
-    const d = dadosDe(s.id)
-    for (const [k, rot, dica] of s.topicos) {
-      partes.push(h('section', { class: 'ed-parte' }, h('h2', {}, rot), h('p', { class: 'dica' }, dica),
-        campo('', d, k, { area: true, linhas: 8, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' })))
-    }
-    partes.push(editorBlocos(d, { titulo: 'Fotos e documentos (opcional)', dica: 'Aparecem no fim da página, depois dos quatro tópicos.' }))
-  }
   else {
     const d = dadosDe(s.id)
     if (s.campos || s.pai) {
@@ -255,7 +247,7 @@ function desenharEditor () {
     }
     partes.push(editorBlocos(d, {
       titulo: s.filhos ? 'Texto de abertura' : 'Conteúdo da página',
-      dica: s.filhos ? 'Aparece no alto da página, antes da lista.' : 'Textos, fotos, vídeos e documentos, na ordem em que aparecem no site.',
+      dica: s.filhos ? 'Aparece no alto da página, antes da lista.' : s.dica ? 'O que escrever: ' + s.dica : 'Textos, fotos, vídeos e documentos, na ordem em que aparecem no site.',
     }))
   }
 

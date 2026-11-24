@@ -312,6 +312,9 @@ function resumoSecao (s) {
   return r[s.id] || ''
 }
 
+// a página já tem algum conteúdo escrito ou alguma mídia?
+const temTexto = (d) => (d.blocos || []).some(b => b && (b.url || (b.itens || []).length || !vazio(b.texto)))
+
 function pagIndice (s) {
   const d = dados(s.id)
   // O nome não repete o número: a marca de ensaio já o traz.
@@ -322,8 +325,8 @@ function pagIndice (s) {
       n: f.ordem,
       nome: vazio(fd.titulo) ? (f.rotulo || f.titulo) : fd.titulo,
       meta: [fd.data, fd.turma, fd.tema].filter(x => !vazio(x)).join(' · '),
-      res: fd.resumo || '',
-      pendente: vazio(fd.resumo) && vazio(fd.titulo),
+      res: fd.resumo || f.dica || '',
+      pendente: vazio(fd.resumo) && vazio(fd.titulo) && !(f.dica && temTexto(fd)),
     }
   }))
 
@@ -530,29 +533,12 @@ function pagSimples (s) {
     ${renderCampos(s.campos, d)}
     <div class="cartao corpo${s.pai === 'relatos' && temConteudo ? ' com-dobras' : ''}">
       ${temConteudo ? partes + corpo : vazioAviso({
-        titulo: 'Conteúdo a inserir',
-        texto: 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos.',
+        titulo: s.dica ? 'A escrever' : 'Conteúdo a inserir',
+        texto: s.dica || 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos.',
       })}
     </div>
     ${s.pai === 'relatos' ? ponte(s.ordem, 'plano') : ''}
     ${s.pai ? vizinhos(s) : ''}
-  </div></div>`
-}
-
-// Introdução: quatro tópicos fixos, cada um com o próprio título. Tópico
-// ainda sem texto mostra o que deve ser escrito ali.
-function pagIntroducao (s) {
-  const d = dados(s.id)
-  const topicos = s.topicos.map(([k, rot, dica], i) => `
-    <h3 class="sub fig fig-${i + 1}">${esc(rot)}</h3>
-    <div class="cartao corpo">
-      ${vazio(d[k]) ? vazioAviso({ titulo: 'A escrever', texto: dica }) : paragrafos(d[k])}
-    </div>`).join('')
-  const extra = renderBlocos(d.blocos)
-  return `<div class="contem"><div class="pagina introducao">
-    <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
-    ${topicos}
-    ${extra ? `<div class="cartao corpo">${extra}</div>` : ''}
   </div></div>`
 }
 
@@ -612,7 +598,6 @@ function trocar () {
   if (s.id === 'inicio') el.innerHTML = pagInicio(s)
   else if (s.filhos) el.innerHTML = pagIndice(s)
   else if (s.referencias) el.innerHTML = pagBibliografia(s)
-  else if (s.topicos) el.innerHTML = pagIntroducao(s)
   else el.innerHTML = pagSimples(s)
   desenharPdfs()
 

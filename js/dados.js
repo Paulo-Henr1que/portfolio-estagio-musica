@@ -59,18 +59,23 @@ const CAMPOS_RELATO_AULA = [
 
 // Os quatro tópicos da Introdução: chave, título e o que escrever.
 const TOPICOS_INTRODUCAO = [
-  ['contexto_estagio', 'Contexto do estágio',
+  ['contexto-do-estagio', 'Contexto do Estágio',
     'Um ou dois parágrafos sobre o projeto de estágio e os outros níveis de estágio cursados: em que local, o que desenvolveu e o que aprendeu em cada um deles.'],
-  ['contexto_deste', 'Contexto deste estágio',
+  ['contexto-deste-estagio', 'Contexto deste Estágio',
     'Organização da disciplina de estágio e das atividades desenvolvidas, organização do estágio na escola campo, distribuição da carga horária, período em que ocorreu e a carga horária de cada atividade.'],
-  ['turmas', 'As turmas',
+  ['turmas', 'As Turmas',
     'As turmas em que o estágio foi realizado: número de alunos, faixa etária e informações gerais das semanas de observação, como a relação professor-aluno, a relação entre os alunos e os conteúdos desenvolvidos.'],
-  ['leituras', 'Leituras e reflexões',
+  ['leituras', 'Leituras e Reflexões',
     'Breve relato sobre as atividades de leitura e reflexão sobre o estágio propostas pela equipe de professores do estágio.'],
 ]
 
 // ── Montagem das seções ────────────────────────────────────────────
 const S = (id, titulo, extra = {}) => ({ id, titulo, blocos: true, ...extra })
+
+// cada tópico da Introdução é uma página própria (id: introducao-contexto-do-estagio…)
+const introducao = TOPICOS_INTRODUCAO.map(([k, titulo, dica], i) => S(
+  'introducao-' + k, titulo, { pai: 'introducao', ordem: i + 1, dica }
+))
 
 const observacoes = [1, 2, 3].map(n => S(
   'observacao-' + n, 'Relato de Observação ' + n,
@@ -95,7 +100,8 @@ window.SECOES = [
 
   S('escola', 'Dados da Escola', { menu: true, menuTitulo: 'A Escola', campos: CAMPOS_ESCOLA }),
 
-  S('introducao', 'Introdução', { menu: true, topicos: TOPICOS_INTRODUCAO }),
+  S('introducao', 'Introdução', { menu: true, filhos: introducao }),
+  ...introducao,
 
   S('observacoes', 'Relatos de Observação', { menu: true, menuTitulo: 'Observações', filhos: observacoes }),
   ...observacoes,

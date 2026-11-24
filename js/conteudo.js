@@ -82,13 +82,43 @@ window.CONTEUDO = {
   },
 
   // ── Introdução ──────────────────────────────────────────────
-  // Quatro tópicos. Deixe uma linha em branco entre os parágrafos.
+  // Página de abertura; cada um dos quatro tópicos tem página própria logo abaixo.
   'introducao': {
-    contexto_estagio: ``,   // Contexto do estágio
-    contexto_deste: ``,     // Contexto deste estágio
-    turmas: ``,             // As turmas
-    leituras: ``,           // Leituras e reflexões
-    blocos: [],             // fotos ou documentos extras, se quiser
+    blocos: [
+      { tipo: 'texto', texto: `` },
+    ],
+  },
+
+  // ── Introdução › Contexto do Estágio ─────────────────────
+  'introducao-contexto-do-estagio': {
+    resumo: '',             // frase curta que aparece na lista da Introdução
+    blocos: [
+      { tipo: 'texto', texto: `` },
+    ],
+  },
+
+  // ── Introdução › Contexto deste Estágio ──────────────────
+  'introducao-contexto-deste-estagio': {
+    resumo: '',             // frase curta que aparece na lista da Introdução
+    blocos: [
+      { tipo: 'texto', texto: `` },
+    ],
+  },
+
+  // ── Introdução › As Turmas ───────────────────────────────
+  'introducao-turmas': {
+    resumo: '',             // frase curta que aparece na lista da Introdução
+    blocos: [
+      { tipo: 'texto', texto: `` },
+    ],
+  },
+
+  // ── Introdução › Leituras e Reflexões ────────────────────
+  'introducao-leituras': {
+    resumo: '',             // frase curta que aparece na lista da Introdução
+    blocos: [
+      { tipo: 'texto', texto: `` },
+    ],
   },
 
   // ── Relatos de Observação ───────────────────────────────────
