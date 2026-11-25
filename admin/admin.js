@@ -62,6 +62,8 @@ const ICONES = {
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   texto: '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>',
   pagina: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
+  alvo: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  baixar: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>',
   link: '<path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/>',
 }
 const ic = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`
@@ -526,10 +528,50 @@ function editorBlocos (d, { titulo, dica }) {
   return sec
 }
 
+// Opções visuais de cada tipo de bloco. O primeiro valor é o padrão.
+const APARENCIA = {
+  texto: [
+    ['alinha', 'Alinhamento', [['', 'Esquerda'], ['justificado', 'Justificado'], ['centro', 'Centralizado']]],
+    ['letra', 'Tamanho da letra', [['', 'Normal'], ['pequena', 'Menor'], ['grande', 'Maior']]],
+    ['destaque', 'Destaque', [['', 'Nenhum'], ['caixa', 'Caixa colorida'], ['linha', 'Entre linhas']]]],
+  subtitulo: [
+    ['alinha', 'Alinhamento', [['', 'Esquerda'], ['centro', 'Centralizado']]],
+    ['letra', 'Tamanho', [['', 'Normal'], ['pequena', 'Menor'], ['grande', 'Maior']]]],
+  citacao: [
+    ['estilo', 'Estilo', [['', 'Linha ao lado'], ['destaque', 'Grande e centralizada'], ['caixa', 'Dentro de uma caixa']]],
+    ['alinha', 'Alinhamento', [['', 'Esquerda'], ['centro', 'Centralizado']]]],
+  imagem: [
+    ['cantos', 'Cantos', [['', 'Arredondados'], ['retos', 'Retos'], ['redondos', 'Bem redondos']]],
+    ['moldura', 'Moldura', [['', 'Borda fina'], ['sem', 'Sem borda'], ['sombra', 'Com sombra']]]],
+  galeria: [
+    ['colunas', 'Fotos por linha', [['', 'Automático'], ['2', '2'], ['3', '3'], ['4', '4']]],
+    ['formato', 'Formato das fotos', [['', 'Retangulares iguais'], ['quadrada', 'Quadradas'], ['inteira', 'Foto inteira, sem cortar']]]],
+  pdf: [
+    ['largura', 'Largura do documento', [['', 'Largura total'], ['grande', 'Grande'], ['media', 'Média']]]],
+}
+function grupoOpcoes (b, chave, rotulo, lista, aoMudar) {
+  const grupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': rotulo })
+  const pintar = () => grupo.replaceChildren(...lista.map(([v, nome]) => h('button', {
+    type: 'button', 'aria-pressed': String((b[chave] || '') === v),
+    onclick: () => { if (v === '') delete b[chave]; else b[chave] = v; mudou(); pintar(); if (aoMudar) aoMudar() },
+  }, nome)))
+  pintar()
+  return h('div', { class: 'cx' }, rotulo, grupo)
+}
+function aparenciaBloco (b, extra = []) {
+  const defs = APARENCIA[b.tipo] || []
+  if (!defs.length && !extra.length) return null
+  const caixa = h('details', { class: 'aparencia-bloco' },
+    h('summary', {}, h('span', {}, 'Ajustar aparência'), h('small', {}, 'alinhamento, tamanho, estilo')),
+    h('div', { class: 'aparencia-corpo' }, ...extra, ...defs.map(([k, rot, l]) => grupoOpcoes(b, k, rot, l))))
+  if (defs.some(([k]) => b[k]) || (b.tipo === 'video' && b.tamanho)) caixa.open = true
+  return caixa
+}
+
 function corpoBloco (b) {
   switch (b.tipo) {
     case 'texto':
-      return [comLink(campo('', b, 'texto', { area: true, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' }), b, 'texto'), opcaoRetratil(b)]
+      return [comLink(campo('', b, 'texto', { area: true, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' }), b, 'texto'), aparenciaBloco(b), opcaoRetratil(b)]
     case 'retratil': {
       const aberta = h('input', { type: 'checkbox', onchange: (e) => { if (e.target.checked) b.aberta = true; else delete b.aberta; mudou() } })
       aberta.checked = !!b.aberta
@@ -540,18 +582,20 @@ function corpoBloco (b) {
       ]
     }
     case 'subtitulo':
-      return [campo('', b, 'texto', { ph: 'Ex.: Turma 5º A' })]
+      return [campo('', b, 'texto', { ph: 'Ex.: Turma 5º A' }), aparenciaBloco(b)]
     case 'citacao':
-      return [campo('', b, 'texto', { area: true, linhas: 3, ph: 'Trecho citado de um autor.' }), opcaoRetratil(b)]
-    case 'imagem': return [...editorImagem(b), opcaoRetratil(b)]
-    case 'galeria': return [...editorGaleria(b), opcaoRetratil(b)]
-    case 'video': return [...editorVideo(b), opcaoRetratil(b)]
+      return [campo('', b, 'texto', { area: true, linhas: 3, ph: 'Trecho citado de um autor.' }),
+        campo('Autor ou fonte (opcional)', b, 'autor', { ph: 'Ex.: Paulo Freire, 1996' }), aparenciaBloco(b), opcaoRetratil(b)]
+    case 'imagem': return [...editorImagem(b), aparenciaBloco(b), opcaoRetratil(b)]
+    case 'galeria': return [...editorGaleria(b), aparenciaBloco(b), opcaoRetratil(b)]
+    case 'video': return [...editorVideo(b), aparenciaBloco(b, [escolhaTamanho(b, true)]), opcaoRetratil(b)]
     case 'pdf': return [
       arquivoPdf(b, 'url'),
       formatoPdf(b),
       h('div', { class: 'grade-campos' },
         campo('Legenda (opcional)', b, 'legenda'),
         campo('Link do Google Drive (opcional)', b, 'drive', { ph: 'https://drive.google.com/…' })),
+      b.formato === 'botao' ? null : aparenciaBloco(b),
       opcaoRetratil(b),
     ]
     default:
@@ -647,7 +691,7 @@ function formatoPdf (b) {
   return h('div', {}, h('div', { class: 'cx' }, 'Como aparece no site', grupo), nome)
 }
 
-function escolhaTamanho (b) {
+function escolhaTamanho (b, video = false) {
   const atual = () => b.tamanho || 'total'
   const grupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': 'Tamanho da foto' })
   const pintar = () => grupo.replaceChildren(...TAMANHOS.map(([v, rot]) => h('button', {
@@ -657,7 +701,7 @@ function escolhaTamanho (b) {
   pintar()
   const posGrupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': 'Posição da foto' })
   const posCx = h('div', { class: 'cx' }, 'Posição', posGrupo)
-  const posAtual = () => b.posicao || (b.tamanho === 'pequena' ? 'esquerda' : 'centro')
+  const posAtual = () => b.posicao || (b.tamanho === 'pequena' && !video ? 'esquerda' : 'centro')
   const pintarPos = () => {
     posCx.hidden = !(b.tamanho === 'pequena' || b.tamanho === 'media')
     posGrupo.replaceChildren(...[['esquerda', 'Ao lado do texto (esquerda)'], ['centro', 'Centralizada'], ['direita', 'Ao lado do texto (direita)']]
@@ -787,7 +831,7 @@ function editorEstagios () {
     h('div', { class: 'grade-campos' }, nome, seletor),
     ESTAGIO > 1 ? h('label', { class: 'marcar', style: 'margin-top:14px' }, ativo, 'Mostrar este estágio no site') : null)
 
-  const partes = [lista, este]
+  const partes = [lista, este, secaoBackup()]
   // estágio novo: aproveitar aparência, menu e textos do estágio 1
   if (ESTAGIO > 1) {
     const bt = h('button', { type: 'button', class: 'bt leve', onclick: async () => {
@@ -807,6 +851,48 @@ function editorEstagios () {
       bt))
   }
   return partes
+}
+
+// Cópia de segurança: baixa todos os estágios num arquivo e restaura depois.
+function secaoBackup () {
+  const txt = h('span', { class: 'envio-txt' })
+  const baixar = h('button', { type: 'button', class: 'bt leve', html: ic('baixar') + ' Baixar cópia de segurança', onclick: async () => {
+    baixar.disabled = true; txt.textContent = 'preparando…'
+    try {
+      const copiaTudo = { tipo: 'portfolio-estagio', criado: new Date().toISOString(), estagios: {} }
+      for (const n of [1, 2, 3]) {
+        const d = await api('conteudo?estagio=' + n, { cache: 'no-store' })
+        if (d && !d.vazio && d.conteudo) copiaTudo.estagios[n] = { conteudo: d.conteudo, planos: d.planos || {} }
+      }
+      const a = h('a', { href: URL.createObjectURL(new Blob([JSON.stringify(copiaTudo, null, 1)], { type: 'application/json' })),
+        download: 'portfolio-copia-' + new Date().toISOString().slice(0, 10) + '.json' })
+      document.body.append(a); a.click(); a.remove()
+      txt.textContent = 'Cópia baixada. Guarde o arquivo num lugar seguro.'
+    } catch (e) { txt.textContent = ''; avisar('Não foi possível baixar: ' + e.message, true) }
+    baixar.disabled = false
+  } })
+  const arq = h('input', { type: 'file', accept: 'application/json,.json', hidden: true })
+  arq.addEventListener('change', async () => {
+    const f = arq.files[0]; arq.value = ''
+    if (!f) return
+    try {
+      const d = JSON.parse(await f.text())
+      if (!d || d.tipo !== 'portfolio-estagio' || !d.estagios) throw new Error('Este arquivo não é uma cópia do portfólio.')
+      const ns = Object.keys(d.estagios)
+      if (!(await confirmar('Restaurar a cópia?', 'Os estágios ' + ns.join(', ') + ' voltam a ficar como estavam em ' +
+        new Date(d.criado).toLocaleDateString('pt-BR') + '. O que está publicado agora nesses estágios será substituído.', 'Restaurar'))) return
+      for (const n of ns) await api('conteudo?estagio=' + n, { method: 'PUT', body: d.estagios[n] })
+      try { localStorage.removeItem(RASCUNHO) } catch {}
+      avisar('Cópia restaurada. Recarregando…')
+      publicado = JSON.stringify(estado) // não pergunta sobre sair
+      setTimeout(() => location.reload(), 900)
+    } catch (e) { avisar('Não foi possível restaurar: ' + e.message, true) }
+  })
+  return h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Cópia de segurança'),
+    h('p', { class: 'dica' }, 'Baixa todos os textos, configurações e endereços das fotos e vídeos dos três estágios num arquivo. Vale guardar uma cópia de vez em quando, por garantia.'),
+    h('div', { class: 'enviar' }, baixar,
+      h('button', { type: 'button', class: 'bt leve', onclick: () => arq.click() }, 'Restaurar uma cópia'), arq, txt))
 }
 
 // ── Configurações: aparência ───────────────────────────────────────
@@ -896,49 +982,101 @@ function editorMenu () {
   const s = site()
   const menu = sob(s, 'menu')
   const caixa = h('div')
+  // não guarda campos vazios
+  const limpar = (id) => {
+    const m = menu[id]
+    if (m) for (const k of Object.keys(m)) if (m[k] === '' || m[k] == null) delete m[k]
+  }
+  const ordemAtual = () => window.SECOES.filter(x => !x.pai).map(x => x.id)
   const desenhar = () => {
     const raiz = window.SECOES.filter(x => !x.pai)
-    caixa.replaceChildren(h('div', { class: 'menu-itens' }, raiz.map((x, i) => {
+    const itens = raiz.map((x, i) => {
       const m = sob(menu, x.id)
       const nomeMenu = campo('Nome no menu', m, 'menu', { ph: x.menuPadrao })
-      const titulo = campo('Título da página', m, 'titulo', { ph: x.tituloPadrao })
+      const titulo = campo('Título no alto da página', m, 'titulo', { ph: x.tituloPadrao })
       for (const c of [nomeMenu, titulo]) c.querySelector('input').addEventListener('change', () => { limpar(x.id); atualizarEstrutura() })
-      const ver = h('input', { type: 'checkbox', disabled: x.id === 'inicio', onchange: (e) => {
+      const mostra = h('input', { type: 'checkbox', disabled: x.id === 'inicio', onchange: (e) => {
         if (e.target.checked) delete m.oculto; else m.oculto = true
-        limpar(x.id); mudou(); atualizarEstrutura(); desenhar()
+        mudou(); atualizarEstrutura(); desenhar()
       } })
-      ver.checked = !m.oculto
+      mostra.checked = !m.oculto
       const mexer = (d) => {
-        const ids = raiz.map(r => r.id)
+        const ids = ordemAtual()
         const j = i + d
         if (j < 1 || j >= ids.length) return
         ;[ids[i], ids[j]] = [ids[j], ids[i]]
         s.ordem = ids.filter(id => id !== 'inicio')
         mudou(); atualizarEstrutura(); desenhar()
       }
+      const excluir = async () => {
+        const nome = x.menuTitulo || x.titulo
+        if (x.extra) {
+          if (!(await confirmar('Excluir “' + nome + '”?', 'A página, as subpáginas e tudo o que foi escrito nelas saem do site quando você publicar.', 'Excluir'))) return
+          for (const f of (x.filhos || [])) delete estado.conteudo[f.id]
+          delete estado.conteudo[x.id]; delete menu[x.id]
+          s.extras = (s.extras || []).filter(e => e.id !== x.id)
+        } else {
+          if (!(await confirmar('Excluir “' + nome + '”?', 'O item sai do menu e do site. O que foi escrito nele fica guardado: dá para restaurar depois, logo abaixo.', 'Excluir'))) return
+          s.removidos = [...new Set([...(s.removidos || []), x.id])]
+        }
+        if (Array.isArray(s.ordem)) s.ordem = s.ordem.filter(id => id !== x.id)
+        mudou(); atualizarEstrutura(); desenhar()
+      }
       return h('div', { class: 'menu-item' + (m.oculto ? ' fora' : '') },
         h('span', { class: 'sub-n' }, String(i + 1).padStart(2, '0')),
-        h('div', { class: 'menu-campos' }, nomeMenu, titulo,
-          h('label', { class: 'marcar' }, ver, x.id === 'inicio' ? 'Sempre no menu' : 'Aparece no menu')),
+        h('div', { class: 'menu-campos' },
+          h('div', { class: 'menu-topo' },
+            h('b', {}, x.menuTitulo || x.titulo, x.extra ? h('small', {}, ' · página criada por você') : null),
+            h('div', { class: 'menu-links' },
+              botaoVer('menu-' + x.id, x.id),
+              h('a', { class: 'ver-no-site', href: '#' + x.id }, 'Editar conteúdo →'))),
+          nomeMenu, titulo,
+          h('label', { class: 'marcar' }, mostra, x.id === 'inicio' ? 'Sempre no menu' : 'Aparece no menu do topo')),
         h('div', { class: 'acoes-item' },
           icBt('cima', 'Subir', () => mexer(-1), { disabled: i <= 1 }),
-          icBt('baixo', 'Descer', () => mexer(1), { disabled: i === 0 || i === raiz.length - 1 })))
-    })))
-  }
-  // não guarda objetos vazios
-  const limpar = (id) => {
-    const m = menu[id]
-    if (m) for (const k of Object.keys(m)) if (m[k] === '' || m[k] == null) delete m[k]
+          icBt('baixo', 'Descer', () => mexer(1), { disabled: i === 0 || i === raiz.length - 1 }),
+          x.id === 'inicio' ? null : icBt('lixo', 'Excluir do menu', excluir)))
+    })
+
+    // novo item
+    const novo = h('input', { placeholder: 'Nome do novo item, ex.: Projeto Final', 'aria-label': 'Nome do novo item do menu' })
+    const criar = () => {
+      const titulo = novo.value.trim()
+      if (!titulo) { novo.focus(); return }
+      let id = 'pag-' + slug(titulo), n = 2
+      while (secao(id) || estado.conteudo[id]) id = 'pag-' + slug(titulo) + '-' + n++
+      s.extras = [...(s.extras || []), { id, titulo }]
+      estado.conteudo[id] = { blocos: [] }
+      mudou(); atualizarEstrutura(); desenhar()
+      avisar('Item criado no fim do menu. Use as setas para mudar a posição.')
+    }
+    novo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); criar() } })
+
+    // itens excluídos (os originais), para restaurar
+    const fora = window.SECOES_REMOVIDAS || []
+    caixa.replaceChildren(
+      h('div', { class: 'menu-itens' }, itens),
+      h('div', { class: 'nova-sub' }, novo,
+        h('button', { type: 'button', class: 'chip', html: ic('mais') + ' Adicionar item ao menu', onclick: criar })),
+      h('p', { class: 'dica', style: 'margin:8px 0 0' }, 'O item novo vira uma página própria, com texto, fotos, vídeos e documentos. Ela também pode ter subpáginas.'),
+      fora.length ? h('div', { class: 'removidos' },
+        h('b', {}, 'Itens excluídos'),
+        ...fora.map(r => h('div', { class: 'removido' }, h('span', {}, r.titulo),
+          h('button', { type: 'button', class: 'bt leve pequeno', onclick: () => {
+            s.removidos = (s.removidos || []).filter(id => id !== r.id)
+            mudou(); atualizarEstrutura(); desenhar(); avisar('“' + r.titulo + '” voltou ao menu.')
+          } }, 'Restaurar')))) : null)
   }
   desenhar()
   const secMenu = h('section', { class: 'ed-parte' },
     h('h2', {}, 'Itens do menu'),
-    h('p', { class: 'dica' }, 'Campo vazio usa o nome original (o que aparece em cinza). O Início fica sempre em primeiro.'),
+    h('p', { class: 'dica' }, 'Cada cartão é um item do menu do topo do site. Campo vazio usa o nome original (em cinza). Use as setas para mudar a ordem e a lixeira para excluir. “Ver no site” mostra onde o item fica.'),
     caixa)
 
   const qtd = sob(s, 'quantidades')
   const numero = (k) => {
-    const sec = secao(k) || { titulo: k }
+    const sec = secao(k)
+    if (!sec) return null
     const inp = h('input', { type: 'number', min: 1, max: 30, inputmode: 'numeric' })
     inp.value = qtd[k] || window.QTD_PADRAO[k]
     inp.addEventListener('change', () => {
@@ -957,28 +1095,48 @@ function editorMenu () {
 }
 
 // ── Configurações: textos fixos e nomes de campos ──────────────────
+// Onde cada texto aparece (página aberta na pré-visualização).
+function rotaDoTexto (k) {
+  const primeiraCom = (teste) => (window.SECOES.find(x => teste(estado.conteudo[x.id] || {})) || {}).id
+  if (/^res-|^sec|^capa|^marca|^semDocs|^aPreencher$|^baixar$|^estagioSeletor$/.test(k)) return 'inicio'
+  if (k === 'nomeObservacao') return 'observacao-1'
+  if (k === 'nomePlano') return 'plano-1'
+  if (k === 'nomeRelato') return 'relato-1'
+  if (k === 'acessar') return 'observacoes'
+  if (k === 'pontePlano' || k === 'continuar' || k === 'fotosVideos') return 'relato-1'
+  if (k === 'ponteRelato' || k === 'abrirDrive') return 'plano-1'
+  if (k === 'refsVazio') return 'bibliografia'
+  if (k === 'abrirPdf') return primeiraCom(d => (d.blocos || []).some(b => b.tipo === 'pdf' && b.formato !== 'botao'))
+  if (k === 'abrir') return primeiraCom(d => (d.blocos || []).some(b => b.tipo === 'pdf' && b.formato === 'botao'))
+  return 'inicio'
+}
+const ALVO_TEXTO = { nomeObservacao: 'titulo-observacao-1', nomePlano: 'titulo-plano-1', nomeRelato: 'titulo-relato-1' }
+
 function editorTextos () {
   const s = site()
   const textos = sob(s, 'textos')
-  const partes = window.TEXTOS_PADRAO.filter(([g]) => g !== 'Topo do site').map(([grupo, lista]) =>
+  const ajuda = h('div', { class: 'ajuda-ver' }, h('span', { html: ic('alvo') }),
+    h('p', {}, 'Clique em ', h('b', {}, 'Ver no site'), ' ao lado de qualquer texto: a pré-visualização abre na página certa com o texto contornado em laranja. Campo vazio usa o texto original, que aparece em cinza.'))
+  const linha = (rotulo, obj, k, padrao, alvo, rota) => {
+    const longo = padrao.length > 70
+    const c = campo(rotulo, obj, k, longo ? { area: true, linhas: 2, ph: padrao, classe: 'texto-curto' } : { ph: padrao })
+    c.querySelector('input, textarea').addEventListener('change', () => { if (!obj[k]) delete obj[k]; atualizarEstrutura() })
+    return h('div', { class: 'texto-linha' + (longo ? ' largo' : '') }, c, botaoVer(alvo, rota))
+  }
+  const partes = [ajuda, ...window.TEXTOS_PADRAO.filter(([g]) => g !== 'Topo do site').map(([grupo, lista]) =>
     h('section', { class: 'ed-parte' },
       h('h2', {}, grupo),
-      h('div', { class: 'grade-campos' }, lista.map(([k, rot, padrao]) => {
-        const c = campo(rot, textos, k, padrao.length > 70 ? { area: true, linhas: 2, ph: padrao, classe: 'largo texto-curto' } : { ph: padrao })
-        c.querySelector('input, textarea').addEventListener('change', () => { if (!textos[k]) delete textos[k]; atualizarEstrutura() })
-        return c
-      }))))
+      h('div', { class: 'textos-grade' }, lista.map(([k, rot, padrao]) =>
+        linha(rot, textos, k, padrao, ALVO_TEXTO[k] || k, () => rotaDoTexto(k))))))]
   const rotulos = sob(s, 'rotulos')
   for (const [titulo, grupo, campos] of window.CAMPOS_ROTULOS) {
     const g = sob(rotulos, grupo)
+    const secId = grupo === 'ident' ? 'inicio' : grupo
     partes.push(h('section', { class: 'ed-parte' },
       h('h2', {}, titulo),
       h('p', { class: 'dica' }, 'O nome de cada campo, como aparece no site e no painel.'),
-      h('div', { class: 'grade-campos' }, campos.map(([k, rot]) => {
-        const c = campo(rot, g, k, { ph: rot })
-        c.querySelector('input').addEventListener('change', () => { if (!g[k]) delete g[k]; atualizarEstrutura() })
-        return c
-      }))))
+      h('div', { class: 'textos-grade' }, campos.map(([k, rot]) =>
+        linha(rot, g, k, rot, (grupo === 'ident' ? 'rot-ident-' : 'rot-' + secId + '-') + k, secId)))))
   }
   return partes
 }
@@ -1062,18 +1220,26 @@ function limparParaSalvar (e) {
 
 // Pré-visualização: o próprio site, num quadro, com o rascunho.
 let previaPronta = false
-function abrirPrevia (paraPublicar) {
+// Botão "Ver no site": abre a pré-visualização na página certa e contorna o texto.
+function botaoVer (alvo, rota, rotulo = 'Ver no site') {
+  return h('button', { type: 'button', class: 'ver-no-site', title: 'Mostra onde isso aparece no site', html: ic('alvo') + ' ' + rotulo,
+    onclick: () => { const r = typeof rota === 'function' ? rota() : rota; abrirPrevia(false, { rota: r || 'inicio', alvo }) } })
+}
+
+function abrirPrevia (paraPublicar, destaque) {
   const tela = $('#previa'), q = $('#previa-quadro')
   $('#previa-titulo').textContent = paraPublicar ? 'Confira antes de publicar' : 'Pré-visualização'
   $('#previa-sub').textContent = paraPublicar
     ? 'Veja se está tudo certo. Navegue pelo menu para conferir outras páginas.'
+    : destaque ? 'O contorno laranja mostra onde fica o que você está editando.'
     : 'Assim a página vai ficar. Nada foi publicado ainda.'
   $('#previa-publicar').hidden = !sujo()
   tela.hidden = false
   document.body.style.overflow = 'hidden'
-  const enviar = () => q.contentWindow.postMessage({ tipo: 'previa', ...limparParaSalvar(estado), rota: ehConfig(atual) ? 'inicio' : atual }, location.origin)
+  const rota = destaque ? destaque.rota : ehConfig(atual) ? 'inicio' : atual
+  const enviar = () => q.contentWindow.postMessage({ tipo: 'previa', ...limparParaSalvar(estado), rota, destacar: destaque ? destaque.alvo : null }, location.origin)
   if (!previaPronta || !q.src) {
-    q.src = '../index.html?previa=1#/' + (ehConfig(atual) ? 'inicio' : atual)
+    q.src = '../index.html?previa=1#/' + rota
     window.addEventListener('message', function pronto (e) {
       if (e.origin === location.origin && e.data && e.data.tipo === 'previa-pronta') { previaPronta = true; enviar() }
     })
@@ -1213,6 +1379,10 @@ $('#form-editor').addEventListener('submit', async (e) => {
 $('#bt-previa').addEventListener('click', () => abrirPrevia(false))
 $('#bt-salvar').addEventListener('click', () => abrirPrevia(true))
 $('#previa-voltar').addEventListener('click', fecharPrevia)
+window.addEventListener('message', (e) => {
+  if (e.origin === location.origin && e.data && e.data.tipo === 'destaque-faltou')
+    avisar('Isso não está aparecendo no site agora. Alguns textos só aparecem em certas situações, como um aviso de página vazia.', true)
+})
 $('#previa-publicar').addEventListener('click', publicar)
 document.querySelectorAll('.previa-tam button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.previa-tam button').forEach(x => x.setAttribute('aria-pressed', String(x === b)))

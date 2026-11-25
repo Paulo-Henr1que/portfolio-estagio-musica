@@ -684,3 +684,52 @@ figure.foto.tam-media.lado-esq, figure.foto.tam-media.lado-dir{ max-width:min(42
 .estagios a:hover{ color:var(--escuro); background:var(--branco); }
 .estagios a[aria-current]{ background:var(--escuro); color:#fff; }
 @media (max-width:560px){ .estagios a{ padding:4px 8px; font-size:11.5px; } }
+
+/* ── Aparência dos blocos (opções do painel) ───────────────────── */
+/* parágrafo */
+.txt-bloco{ margin:0 0 16px; }
+.txt-bloco:last-child{ margin-bottom:0; }
+.alinha-centro, .alinha-centro p{ text-align:center; margin-left:auto; margin-right:auto; }
+.alinha-justificado p{ text-align:justify; hyphens:auto; -webkit-hyphens:auto; }
+.txt-bloco.letra-pequena{ font-size:.86em; }
+.txt-bloco.letra-grande{ font-size:1.18em; }
+.txt-bloco.destaque-caixa{ background:var(--pastel); border-left:4px solid var(--medio); border-radius:10px; padding:18px 22px; margin:22px 0; }
+.txt-bloco.destaque-linha{ border-top:1px solid var(--borda); border-bottom:1px solid var(--borda); padding:18px 0; margin:24px 0; }
+/* subtítulo */
+h3.sub.alinha-centro{ padding-left:0; }
+h3.sub.alinha-centro::before{ position:static; display:block; margin:0 auto 6px; }
+h3.sub.letra-grande{ font-size:34px; }
+h3.sub.letra-pequena{ font-size:22px; }
+/* citação */
+.corpo blockquote cite{ display:block; margin-top:8px; font-size:.72em; font-style:normal; color:var(--tinta-2); font-family:var(--sans); }
+.corpo blockquote.alinha-centro{ border-left:0; padding-left:0; }
+.corpo blockquote.estilo-destaque{ border-left:0; padding:22px 8px; margin:30px auto; font-size:27px; font-style:italic;
+  text-align:center; border-top:1px solid var(--borda); border-bottom:1px solid var(--borda); max-width:46ch; }
+.corpo blockquote.estilo-caixa{ border-left:0; background:var(--creme); border:1px solid var(--borda); border-radius:12px; padding:18px 22px; }
+/* foto */
+figure.cantos-retos img{ border-radius:0; }
+figure.cantos-redondos img{ border-radius:28px; }
+figure.moldura-sem img{ border:0; background:none; }
+figure.moldura-sombra img{ box-shadow:var(--sombra-f); }
+/* galeria */
+.galeria.colunas-2{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+.galeria.colunas-3{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+.galeria.colunas-4{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+@media (max-width:560px){ .galeria.colunas-3, .galeria.colunas-4{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.galeria.formato-inteira img{ aspect-ratio:auto; object-fit:contain; background:var(--branco); }
+.galeria.formato-quadrada img{ aspect-ratio:1; }
+/* vídeo: mesmo tamanho e posição da foto */
+figure.video.tam-pequena{ max-width:min(340px, 60%); margin-left:auto; margin-right:auto; }
+figure.video.tam-media{ max-width:min(540px, 80%); margin-left:auto; margin-right:auto; }
+figure.video.tam-grande{ max-width:min(760px, 100%); margin-left:auto; margin-right:auto; }
+figure.video.lado-esq{ float:left; margin:6px 32px 14px 0; max-width:min(420px, 50%); }
+figure.video.lado-dir{ float:right; margin:6px 0 14px 32px; max-width:min(420px, 50%); }
+@media (max-width:640px){ figure.video.lado-esq, figure.video.lado-dir{ float:none; margin:20px auto; max-width:100%; } }
+/* PDF aberto */
+.pdf-bloco.largura-media{ max-width:640px; margin-left:auto; margin-right:auto; }
+.pdf-bloco.largura-grande{ max-width:860px; margin-left:auto; margin-right:auto; }
+
+/* ── Destaque vindo do painel ("Ver no site") ───────────────────── */
+@keyframes pulso-destaque{ 0%,100%{ outline-color:rgba(214,138,46,.95); } 50%{ outline-color:rgba(214,138,46,.35); } }
+.destacado{ outline:3px solid rgba(214,138,46,.95); outline-offset:5px; border-radius:6px;
+  background-color:rgba(255,214,140,.22) !important; animation:pulso-destaque 1.1s ease-in-out 3; scroll-margin:120px; }

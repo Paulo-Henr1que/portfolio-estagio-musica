@@ -174,7 +174,11 @@ window.montarSecoes = function (conteudo) {
   const site = c._site || {}
   const T = (k) => window.texto(k, c)
   const R = (lista, grupo) => lista.map(([k, rot]) => [k, window.rotuloCampo(grupo, k, rot, c)])
-  const sub = (s) => COM_SUBPAGINAS.includes(s.id) ? comSubpaginas(s, c) : [s]
+  const sub = (s) => COM_SUBPAGINAS.includes(s.id) || s.extra ? comSubpaginas(s, c) : [s]
+  // itens criados no painel: página própria, que também aceita subpáginas
+  const extras = (Array.isArray(site.extras) ? site.extras : []).filter(x => x && x.id)
+    .flatMap(x => sub(S(x.id, x.titulo || 'Nova página', { menu: true, extra: true })))
+  const removidos = Array.isArray(site.removidos) ? site.removidos : []
 
   const observacoes = faixa(qtd(site, 'observacoes')).map(n => S(
     'observacao-' + n, T('nomeObservacao') + ' ' + n,
@@ -208,7 +212,13 @@ window.montarSecoes = function (conteudo) {
     ...sub(S('consideracoes', 'Minhas Reflexões e Observações', { menu: true, menuTitulo: 'Reflexões' })),
 
     { id: 'bibliografia', titulo: 'Bibliografia', menu: true, referencias: true },
+
+    ...extras,
   ]
+  // itens excluídos no painel saem do site (com as páginas filhas); dá para restaurar
+  window.SECOES_REMOVIDAS = lista.filter(s => !s.pai && s.id !== 'inicio' && removidos.includes(s.id))
+    .map(s => ({ id: s.id, titulo: s.menuTitulo || s.titulo }))
+  lista = lista.filter(s => s.id === 'inicio' || !removidos.includes(s.pai || s.id))
 
   // Menu editado no painel: nome no menu, título da página, ocultar e ordem.
   const menu = site.menu || {}

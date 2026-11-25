@@ -29,7 +29,7 @@ const vazio = (v) => v === undefined || v === null || String(v).trim() === ''
 // ── Menu ───────────────────────────────────────────────────────────
 function desenharMenu () {
   document.getElementById('menu').innerHTML = window.SECOES.filter(s => s.menu)
-    .map(s => `<li><a href="#/${s.id}">${esc(s.menuTitulo || s.titulo)}</a></li>`).join('')
+    .map(s => `<li><a href="#/${s.id}" data-texto="menu-${s.id}">${esc(s.menuTitulo || s.titulo)}</a></li>`).join('')
   desenharMarca()
 }
 
@@ -41,7 +41,7 @@ function desenharMarca () {
   m.innerHTML = (logo
     ? `<img class="logo-img" src="${esc(logo)}" alt="">`
     : '<svg viewBox="0 0 128 96" style="color:var(--medio-f)" aria-hidden="true"><use href="#tamandua"/></svg>')
-    + `<span><b>${esc(T('marcaTitulo'))}</b><span>${esc(T('marcaSub'))}</span></span>`
+    + `<span><b data-texto="marcaTitulo">${esc(T('marcaTitulo'))}</b><span data-texto="marcaSub">${esc(T('marcaSub'))}</span></span>`
   m.setAttribute('href', '#/inicio')
 }
 
@@ -57,6 +57,7 @@ function desenharEstagios (lista) {
   }
   cx.setAttribute('role', 'navigation')
   cx.setAttribute('aria-label', T('estagioSeletor'))
+  cx.setAttribute('data-texto', 'estagioSeletor')
   cx.innerHTML = ativos.map(e => {
     const href = location.pathname + (e.n > 1 ? '?estagio=' + e.n : '') + '#/inicio'
     return `<a href="${href}" title="${esc(e.nome)}"${e.n === ESTAGIO ? ' aria-current="true"' : ''}>${esc(e.nome)}</a>`
@@ -128,15 +129,17 @@ function renderBlocoBase (b) {
   const leg = b.legenda ? `<figcaption>${esc(b.legenda)}</figcaption>` : ''
   switch (b.tipo) {
     case 'subtitulo':
-      return b.texto ? `<h3 class="sub">${esc(b.texto)}</h3>` : ''
-    case 'texto':
-      return paragrafos(b.texto)
+      return b.texto ? `<h3 class="sub${cls(b, 'alinha', 'letra')}">${esc(b.texto)}</h3>` : ''
+    case 'texto': {
+      const c = cls(b, 'alinha', 'letra', 'destaque')
+      return c && !vazio(b.texto) ? `<div class="txt-bloco${c}">${paragrafos(b.texto)}</div>` : paragrafos(b.texto)
+    }
     case 'retratil':
       // texto que abre e fecha, com título (como "Turma 5º A")
       if (vazio(b.texto)) return ''
       return dobra(b.titulo || 'Ver mais', paragrafos(b.texto), '', !!b.aberta)
     case 'citacao':
-      return b.texto ? `<blockquote>${esc(b.texto).replace(/\n/g, '<br>')}</blockquote>` : ''
+      return b.texto ? `<blockquote class="${cls(b, 'alinha', 'estilo').trim()}">${esc(b.texto).replace(/\n/g, '<br>')}${b.autor ? `<cite>— ${esc(b.autor)}</cite>` : ''}</blockquote>` : ''
     case 'imagem':
       if (!b.url) return ''
       // tamanho escolhido no painel: pequena, media, grande ou total (padrão)
@@ -145,13 +148,13 @@ function renderBlocoBase (b) {
       // foto pequena ou média pode ficar ao lado do texto (padrão da pequena: à esquerda)
       const pos = (tam === 'pequena' || tam === 'media') ? (b.posicao || (tam === 'pequena' ? 'esquerda' : 'centro')) : 'centro'
       const lado = pos === 'esquerda' ? ' lado-esq' : pos === 'direita' ? ' lado-dir' : ''
-      return `<figure class="foto tam-${tam}${lado}"><img src="${esc(b.url)}" alt="${esc(b.alt || b.legenda || '')}"
+      return `<figure class="foto tam-${tam}${lado}${cls(b, 'cantos', 'moldura')}"><img src="${esc(b.url)}" alt="${esc(b.alt || b.legenda || '')}"
               loading="lazy" data-lupa="imagem">${leg}</figure>`
     }
     case 'galeria': {
       const itens = (b.itens || []).filter(i => i.url)
       if (!itens.length) return ''
-      return `<div class="galeria">` + itens.map(i =>
+      return `<div class="galeria${cls(b, 'colunas', 'formato')}">` + itens.map(i =>
         `<img src="${esc(i.url)}" alt="${esc(i.alt || i.legenda || '')}" loading="lazy"
           data-lupa="imagem" title="${esc(i.legenda || '')}">`).join('') + `</div>`
         + (b.legenda ? `<p class="legenda-galeria">${esc(b.legenda)}</p>` : '')
@@ -160,7 +163,7 @@ function renderBlocoBase (b) {
       if (!b.url) return ''
       // preload="none" — o vídeo só é baixado quando a pessoa der play
       // preload="metadata" para a barra de tempo e os saltos funcionarem logo
-      return `<figure class="video"><video src="${esc(b.url)}" controls preload="metadata" playsinline
+      return `<figure class="video${posicaoMidia(b)}"><video src="${esc(b.url)}" controls preload="metadata" playsinline
               ${b.poster ? `poster="${esc(b.poster)}"` : ''}></video>
         <div class="video-barra">
           ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">${esc(T('abrirDrive'))}</a>` : ''}
@@ -175,20 +178,32 @@ function renderBlocoBase (b) {
         <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#doc"/></svg></div>
       <div class="txt"><b>${esc(b.nome || b.legenda || 'Documento')}</b>
         ${b.nome && b.legenda ? `<span>${esc(b.legenda)}</span>` : ''}</div>
-      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener">${esc(T('abrir'))}</a>
+      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener" data-texto="abrir">${esc(T('abrir'))}</a>
       <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener" download>${esc(T('baixar'))}</a>
     </div></div>`
-      return `<figure class="pdf-bloco">
+      return `<figure class="pdf-bloco${cls(b, 'largura')}">
         <div class="pl-doc" data-pdf="${esc(b.url)}">
           <div class="pl-folhas"><p class="pl-carregando">Carregando o documento…</p></div>
         </div>
         <p class="pl-links">
-          <a href="${esc(b.url)}" target="_blank" rel="noopener">${esc(T('abrirPdf'))}</a>
+          <a href="${esc(b.url)}" target="_blank" rel="noopener" data-texto="abrirPdf">${esc(T('abrirPdf'))}</a>
           ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">${esc(T('abrirDrive'))}</a>` : ''}
         </p>${leg}</figure>`
     default:
       return ''
   }
+}
+
+// classes das opções de aparência: alinha-centro, letra-grande, colunas-3...
+function cls (b, ...chaves) {
+  return chaves.filter(k => b[k] && /^[\w-]+$/.test(String(b[k]))).map(k => ' ' + k + '-' + b[k]).join('')
+}
+// tamanho e posição (vídeo usa as mesmas opções da foto)
+function posicaoMidia (b) {
+  const tam = ['pequena', 'media', 'grande'].includes(b.tamanho) ? b.tamanho : ''
+  if (!tam) return ''
+  const pos = tam !== 'grande' ? (b.posicao || 'centro') : 'centro'
+  return ' tam-' + tam + (pos === 'esquerda' ? ' lado-esq' : pos === 'direita' ? ' lado-dir' : '')
 }
 
 const renderBlocos = (lista) =>
@@ -207,22 +222,22 @@ function indice (itens) {
         <b>${esc(i.nome)}</b>
         ${i.meta ? `<em>${esc(i.meta)}</em>` : ''}
       </span>
-      <span class="res${i.pendente ? ' pendente' : ''}">${i.pendente ? esc(T('aPreencher')) : esc(i.res || '')}</span>
+      <span class="res${i.pendente ? ' pendente' : ''}" ${i.dt ? 'data-texto="' + i.dt + '"' : ''}>${i.pendente ? esc(T('aPreencher')) : esc(i.res || '')}</span>
     </a></li>`).join('') + `</ol>`
 }
 
-function renderCampos (defs, valores) {
+function renderCampos (defs, valores, secId) {
   // titulo e numero já aparecem no H1 e na trilha; não se repetem nas fichas
   const ocultos = ['titulo', 'numero']
   const itens = (defs || []).filter(([k]) => !vazio(valores[k]) && !ocultos.includes(k))
   if (!itens.length) return ''
   return `<div class="campos">` + itens.map(([k, rot]) =>
-    `<div class="campo"><b>${esc(rot)}</b><span>${esc(valores[k])}</span></div>`).join('') + `</div>`
+    `<div class="campo"><b data-texto="rot-${secId}-${k}">${esc(rot)}</b><span>${esc(valores[k])}</span></div>`).join('') + `</div>`
 }
 
 function renderDocumentos (lista) {
   const docs = (lista || []).filter(d => d.url && d.nome)
-  if (!docs.length) return `<div class="aviso"><b>${esc(T('semDocsTit'))}</b>${esc(T('semDocs'))}</div>`
+  if (!docs.length) return `<div class="aviso" data-texto="semDocs"><b data-texto="semDocsTit">${esc(T('semDocsTit'))}</b>${esc(T('semDocs'))}</div>`
   return `<div class="docs">` + docs.map(d => `
     <div class="doc">
       <div class="ic" style="color:var(--medio-f)">
@@ -232,7 +247,7 @@ function renderDocumentos (lista) {
         ${d.descricao ? `<span>${esc(d.descricao)}</span>` : ''}
       </div>
       <a class="bt leve" href="${esc(d.url)}" target="_blank" rel="noopener"
-         download>${esc(T('baixar'))}</a>
+         download data-texto="baixar">${esc(T('baixar'))}</a>
     </div>`).join('') + `</div>`
 }
 
@@ -244,12 +259,12 @@ function vazioAviso (o) {
 function pagInicio (s) {
   const d = dados('inicio')
   const campos = s.campos.map(([k, rot]) => `
-    <div><dt>${esc(rot)}</dt><span class="pont"></span>
-    <dd class="${vazio(d[k]) ? 'vazio' : ''}">${vazio(d[k]) ? esc(T('aPreencher')) : esc(d[k])}</dd></div>`).join('')
+    <div><dt data-texto="rot-ident-${k}">${esc(rot)}</dt><span class="pont"></span>
+    <dd class="${vazio(d[k]) ? 'vazio' : ''}" ${vazio(d[k]) ? 'data-texto="aPreencher"' : ''}>${vazio(d[k]) ? esc(T('aPreencher')) : esc(d[k])}</dd></div>`).join('')
 
   const atalhos = indice(window.SECOES
     .filter(x => x.menu && x.id !== 'inicio')
-    .map((x, i) => ({ id: x.id, n: i + 1, nome: x.titulo, res: resumoSecao(x) })))
+    .map((x, i) => ({ id: x.id, n: i + 1, nome: x.titulo, res: resumoSecao(x), dt: 'res-' + x.id })))
   // a logo enviada no painel substitui o tamanduá também na pauta da capa
   const logo = ((window.CONTEUDO || {})._site || {}).logo
 
@@ -345,18 +360,18 @@ function pagInicio (s) {
     </div>
 
     <div class="contem">
-      <span class="rotulo">${esc(T('capaRotulo'))}</span>
-      <h1>${vazio(d.titulo) ? esc(T('capaTitulo')) : esc(d.titulo)}</h1>
-      <p class="linha">${esc(T('capaLinha'))}</p>
+      <span class="rotulo" data-texto="capaRotulo">${esc(T('capaRotulo'))}</span>
+      <h1 data-texto="capaTitulo">${vazio(d.titulo) ? esc(T('capaTitulo')) : esc(d.titulo)}</h1>
+      <p class="linha" data-texto="capaLinha">${esc(T('capaLinha'))}</p>
     </div>
   </section>
 
   <div class="contem">
     <div class="pagina">
-      <h3 class="sub fig fig-1">${esc(T('secIdent'))}</h3>
+      <h3 class="sub fig fig-1" data-texto="secIdent">${esc(T('secIdent'))}</h3>
       <dl class="ident">${campos}</dl>
 
-      <h3 class="sub fig fig-2">${esc(T('secSobre'))}</h3>
+      <h3 class="sub fig fig-2" data-texto="secSobre">${esc(T('secSobre'))}</h3>
       <div class="cartao corpo">
         ${renderBlocos(d.blocos) || vazioAviso({
           titulo: 'Texto de apresentação',
@@ -364,10 +379,10 @@ function pagInicio (s) {
         })}
       </div>
 
-      <h3 class="sub fig fig-3">${esc(T('secDocs'))}</h3>
+      <h3 class="sub fig fig-3" data-texto="secDocs">${esc(T('secDocs'))}</h3>
       ${renderDocumentos(d.documentos)}
 
-      <h3 class="sub fig fig-4">${esc(T('secSecoes'))}</h3>
+      <h3 class="sub fig fig-4" data-texto="secSecoes">${esc(T('secSecoes'))}</h3>
       ${atalhos}
     </div>
   </div>`
@@ -396,15 +411,15 @@ function pagIndice (s) {
   }))
 
   return `<div class="contem"><div class="pagina">
-    <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
-    ${renderCampos(s.campos, d)}
+    <header><h2 class="titulo" data-texto="titulo-${s.id}">${esc(s.titulo)}</h2></header>
+    ${renderCampos(s.campos, d, s.id)}
     ${s.semAbertura && !renderBlocos(d.blocos) ? '' : `<div class="cartao corpo">
       ${renderBlocos(d.blocos) || vazioAviso({
         titulo: 'Introdução desta seção',
         texto: 'O texto de abertura desta seção ainda será escrito.',
       })}
     </div>`}
-    <h3 class="sub">${esc(T('acessar'))}</h3>
+    <h3 class="sub" data-texto="acessar">${esc(T('acessar'))}</h3>
     ${cartoes}
   </div></div>`
 }
@@ -424,7 +439,7 @@ function ponte (n, para) {
   const nome = (window.secao(alvo) || {}).titulo || (plano ? T('nomePlano') : T('nomeRelato')) + ' ' + n
   return `<a class="ponte ${plano ? 'volta' : ''}" href="#/${alvo}">
     <span class="ponte-ic">${plano ? seta('esq') : seta('dir')}</span>
-    <span class="ponte-txt"><small>${esc(plano ? T('pontePlano') : T('ponteRelato'))}</small>
+    <span class="ponte-txt"><small data-texto="${plano ? 'pontePlano' : 'ponteRelato'}">${esc(plano ? T('pontePlano') : T('ponteRelato'))}</small>
       <b>${nome}</b>${!vazio(ad.titulo) && ad.titulo !== nome ? `<em>${esc(ad.titulo)}</em>` : ''}</span>
   </a>`
 }
@@ -450,7 +465,7 @@ function pagPlano (s, p) {
       <div class="pl-folhas"><p class="pl-carregando">Carregando o plano…</p></div>
     </div>
     <p class="pl-links">
-      <a href="${esc(p.drive)}" target="_blank" rel="noopener">${esc(T('abrirDrive'))}</a>
+      <a href="${esc(p.drive)}" target="_blank" rel="noopener" data-texto="abrirDrive">${esc(T('abrirDrive'))}</a>
     </p>
     ${ponte(s.ordem, 'relato')}
     ${vizinhos(s)}
@@ -515,9 +530,9 @@ const MIDIA = ['imagem', 'galeria', 'video']
 const contaMidia = (bs) => bs.reduce((t, b) =>
   t + (b.tipo === 'galeria' ? (b.itens || []).length : MIDIA.includes(b.tipo) ? 1 : 0), 0)
 
-function dobra (titulo, conteudo, extra, aberta) {
+function dobra (titulo, conteudo, extra, aberta, dt) {
   return `<details class="dobra"${aberta ? ' open' : ''}>
-    <summary><span class="dobra-tit">${esc(titulo)}</span>
+    <summary><span class="dobra-tit"${dt ? ' data-texto="' + dt + '"' : ''}>${esc(titulo)}</span>
       ${extra ? `<span class="dobra-extra">${esc(extra)}</span>` : ''}
       <span class="dobra-seta" aria-hidden="true"></span></summary>
     <div class="dobra-corpo">${conteudo}</div>
@@ -544,14 +559,14 @@ function renderDobras (blocos) {
       const txt = g.itens.filter(b => b.tipo === 'texto').map(b => b.texto).join('\n\n')
       const ps = txt.split(/\n{2,}/).filter(p => p.trim())
       if (ps.length <= 1) return renderBlocos(g.itens)
-      const html = paragrafos(ps[0]) + dobra(T('continuar'), paragrafos(ps.slice(1).join('\n\n')), '', false)
+      const html = paragrafos(ps[0]) + dobra(T('continuar'), paragrafos(ps.slice(1).join('\n\n')), '', false, 'continuar')
       primeira = false
       return html
     }
     const n = contaMidia(g.itens)
     const ehMidia = g.itens.every(b => MIDIA.includes(b.tipo))
     const extra = ehMidia ? n + (n === 1 ? ' item' : ' itens') : ''
-    const html = dobra(g.titulo, renderBlocos(g.itens), extra, primeira && !ehMidia)
+    const html = dobra(g.titulo, renderBlocos(g.itens), extra, primeira && !ehMidia, g.titulo === T('fotosVideos') ? 'fotosVideos' : '')
     primeira = false
     return html
   }).join('')
@@ -594,9 +609,9 @@ function pagSimples (s) {
     <header>
       ${pai ? `<p class="trilho"><a href="#/${pai.id}">${esc(pai.titulo)}</a> <span>›</span>
                <span>${esc(s.titulo)}</span></p>` : ''}
-      <h2 class="titulo">${esc(titulo)}</h2>
+      <h2 class="titulo" data-texto="titulo-${s.id}">${esc(titulo)}</h2>
     </header>
-    ${renderCampos(s.campos, d)}
+    ${renderCampos(s.campos, d, s.id)}
     <div class="cartao corpo${s.pai === 'relatos' && temConteudo ? ' com-dobras' : ''}">
       ${temConteudo ? partes + corpo : vazioAviso({
         titulo: s.dica ? 'A escrever' : 'Conteúdo a inserir',
@@ -623,10 +638,10 @@ function pagBibliografia (s) {
     : vazioAviso({
         titulo: 'Referências',
         texto: T('refsVazio'),
-      })
+      }).replace('<div class="aviso">', '<div class="aviso" data-texto="refsVazio">')
 
   return `<div class="contem"><div class="pagina">
-    <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
+    <header><h2 class="titulo" data-texto="titulo-${s.id}">${esc(s.titulo)}</h2></header>
     <div class="cartao">${lista}</div>
   </div></div>`
 }
@@ -669,6 +684,19 @@ function trocar () {
 
   document.title = (s.id === 'inicio' ? '' : s.titulo + ' · ') + T('marcaTitulo') + ' · ' + T('marcaSub')
   window.scrollTo({ top: 0, behavior: 'instant' })
+}
+
+// Painel → "Ver no site": rola até o texto e o contorna por alguns segundos.
+function destacar (chave) {
+  document.querySelectorAll('.destacado').forEach(x => x.classList.remove('destacado'))
+  const alvo = document.querySelector('[data-texto="' + chave + '"]')
+  if (!alvo) { window.parent.postMessage({ tipo: 'destaque-faltou', chave }, location.origin); return }
+  const dob = alvo.closest('details'); if (dob) dob.open = true
+  const menu = document.getElementById('menu')
+  if (menu.contains(alvo) && getComputedStyle(document.getElementById('bt-menu')).display !== 'none') menu.classList.add('aberto')
+  alvo.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  alvo.classList.add('destacado')
+  setTimeout(() => alvo.classList.remove('destacado'), 4200)
 }
 
 // ── Lupa (ampliar imagem) ──────────────────────────────────────────
@@ -752,8 +780,11 @@ const PREVIA = new URLSearchParams(location.search).has('previa')
       aplicarConteudo(e.data)
       if (e.data.conteudo && !e.data.planos) window.PLANOS = {}
       const alvo = '#/' + (e.data.rota || 'inicio')
-      if (location.hash !== alvo) location.hash = alvo
-      else { const y = window.scrollY; trocar(); window.scrollTo(0, y) }
+      const mudouRota = location.hash !== alvo
+      if (mudouRota) location.hash = alvo
+      else if (!e.data.destacar) { const y = window.scrollY; trocar(); window.scrollTo(0, y) }
+      else trocar()
+      if (e.data.destacar) setTimeout(() => destacar(e.data.destacar), mudouRota ? 700 : 250)
     })
     window.parent.postMessage({ tipo: 'previa-pronta' }, location.origin)
     return
