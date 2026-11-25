@@ -278,3 +278,5 @@
 .link-form input:focus{ outline:none; border-color:var(--medio); }
 .marcar{ display:inline-flex; align-items:center; gap:8px; font-size:14px; color:var(--tinta); cursor:pointer; }
 .marcar input{ width:17px; height:17px; accent-color:var(--medio-f); }
+
+.retratil-op{ display:flex; flex-direction:column; gap:10px; border-top:1px dashed var(--borda); padding-top:12px; }

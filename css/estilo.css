@@ -640,3 +640,5 @@ figure.foto.tam-grande{ max-width:min(760px, 100%); }
 .corpo p a, .dobra-corpo p a{ color:var(--medio-f); text-decoration:underline; text-decoration-thickness:1px;
   text-underline-offset:3px; overflow-wrap:anywhere; }
 .corpo p a:hover, .dobra-corpo p a:hover{ color:var(--escuro); }
+.dobra-corpo > .galeria:first-child{ margin-top:0; }
+.dobra-corpo > .galeria:last-child, .dobra-corpo > figure:last-child{ margin-bottom:0; }

@@ -480,9 +480,9 @@ function corpoBloco (b) {
       return [campo('', b, 'texto', { ph: 'Ex.: Turma 5º A' })]
     case 'citacao':
       return [campo('', b, 'texto', { area: true, linhas: 3, ph: 'Trecho citado de um autor.' })]
-    case 'imagem': return editorImagem(b)
-    case 'galeria': return editorGaleria(b)
-    case 'video': return editorVideo(b)
+    case 'imagem': return [...editorImagem(b), opcaoRetratil(b)]
+    case 'galeria': return [...editorGaleria(b), opcaoRetratil(b)]
+    case 'video': return [...editorVideo(b), opcaoRetratil(b)]
     case 'pdf': return [
       arquivoPdf(b, 'url'),
       h('div', { class: 'grade-campos' },
@@ -528,6 +528,30 @@ function comLink (rotulo, obj, chave) {
   } })
   return h('div', { class: 'com-link' }, rotulo,
     h('div', { class: 'link-barra' }, bt, h('span', { class: 'envio-txt' }, 'Selecione um trecho do texto e clique em Link.')), form)
+}
+
+// Deixa foto, galeria ou vídeo dentro de uma caixa que abre e fecha.
+function opcaoRetratil (b) {
+  const caixa = h('div', { class: 'retratil-op' })
+  const pintar = () => {
+    const marca = h('input', { type: 'checkbox', onchange: (e) => {
+      if (e.target.checked) b.retratil = true
+      else { delete b.retratil; delete b.tituloRetratil; delete b.aberta }
+      mudou(); pintar()
+    } })
+    marca.checked = !!b.retratil
+    const partes = [h('label', { class: 'marcar' }, marca, 'Deixar retrátil (abre e fecha no site)')]
+    if (b.retratil) {
+      const aberta = h('input', { type: 'checkbox', onchange: (e) => { if (e.target.checked) b.aberta = true; else delete b.aberta; mudou() } })
+      aberta.checked = !!b.aberta
+      const padrao = { imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo' }[b.tipo]
+      partes.push(campo('Título da caixa', b, 'tituloRetratil', { ph: 'Ex.: ' + padrao + ' da aula — vazio usa “' + padrao + '”' }),
+        h('label', { class: 'marcar' }, aberta, 'Começar aberto'))
+    }
+    caixa.replaceChildren(...partes)
+  }
+  pintar()
+  return caixa
 }
 
 function editorImagem (b) {

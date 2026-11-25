@@ -75,7 +75,18 @@ const dados = (id) => {
 }
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
+// Foto, galeria e vídeo podem ficar dentro de uma caixa que abre e
+// fecha (opção "retrátil" no painel).
 function renderBloco (b) {
+  const html = renderBlocoBase(b)
+  if (!html || !b.retratil || !['imagem', 'galeria', 'video'].includes(b.tipo)) return html
+  const n = b.tipo === 'galeria' ? (b.itens || []).filter(i => i.url).length : 1
+  const extra = b.tipo === 'video' ? (n === 1 ? '1 vídeo' : n + ' vídeos') : (n === 1 ? '1 foto' : n + ' fotos')
+  const padrao = { imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo' }[b.tipo]
+  return dobra(b.tituloRetratil || padrao, html, extra, !!b.aberta)
+}
+
+function renderBlocoBase (b) {
   if (!b || !b.tipo) return ''
   const leg = b.legenda ? `<figcaption>${esc(b.legenda)}</figcaption>` : ''
   switch (b.tipo) {
