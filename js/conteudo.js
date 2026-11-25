@@ -35,7 +35,7 @@ window.CONTEUDO = {
     ano: '2026.2',                // Ano
     blocos: [
       // { tipo: 'subtitulo', texto: '' },
-      { tipo: 'texto', texto: `` },
+      { tipo: 'texto', texto: `Este portfólio tem como objetivo documentar e apresentar as experiências, aprendizagens e reflexões desenvolvidas durante o estágio supervisionado em Música. Nele, estão reunidos os registros de observação, os planejamentos e relatos das aulas, além das atividades e experiências vivenciadas com os alunos do 5º ano do Ensino Fundamental. Este material representa um espaço de reflexão sobre a prática docente, os desafios encontrados e a construção da identidade como futura educadora musical, bem como sobre o processo de construção do saber musical dos alunos, buscando despertar a curiosidade, estimular questionamentos e incentivar a exploração e a descoberta da música como forma de expressão e aprendizagem.` },
       // { tipo: 'imagem', url: 'midia/arquivo.jpg', legenda: '', alt: '' },
       // { tipo: 'video',  url: 'midia/arquivo.mp4', legenda: '' },
       // { tipo: 'galeria', legenda: '', itens: [
@@ -101,7 +101,7 @@ window.CONTEUDO = {
   'introducao-contexto-deste-estagio': {
     resumo: '',             // frase curta que aparece na lista da Introdução
     blocos: [
-      { tipo: 'texto', texto: `` },
+      { tipo: 'texto', texto: `Nesse último estágio, frequentei a escola CEF Tamanduá, situada na Ponte Alta Norte (Gama – DF). Compareci a escola uma vez por semana, sendo toda terça no período vespertino. Durante as três primeiras semanas observei a aula dada pelo professor, e após o período de observação, conduzi duas turmas no ensino de introdução a música. Nas quintas tínhamos a aula presencial de Estágio, em que nos era orientado como observar, escrever, atuar, pensar, ler, dentre outros aspectos necessários para o estágio e a vida acadêmica/profissional.` },
     ],
   },
 
@@ -109,7 +109,9 @@ window.CONTEUDO = {
   'introducao-turmas': {
     resumo: '',             // frase curta que aparece na lista da Introdução
     blocos: [
-      { tipo: 'texto', texto: `` },
+      { tipo: 'texto', texto: `As turmas que tive oportunidade de acompanhar e ensinar foram as do 5º Ano "A" e "B" do CEF Tamanduá. Somente há duas turmas de 5º ano na escola, por ser um ambiente rural a escola é considerada pequena. O 5º ano B era composto por 20 alunos e sua professora regente é a Carla. A didática usada pela professora desenvolve o contato entre aluno e professor, instigando a curiosidade, a conversa e a afetividade, com um vocabulário mais próximo para cativar o aluno, seu método de disciplina era a conversa, os alunos apresentavam um certo respeito por ela, os alunos demonstravam um bom convívio, mas ainda teve casos de brincadeiras verbais inadequadas. Já o 5º ano A é composto por 16 alunos, e a professora regente é a Lenir, sua didática envolve copiar no quadro e os alunos escreverem no caderno, não tinha tanto contato com a turma, desenvolvia jogos para trazer dinâmicas as aulas, a disciplina era desenvolvida a voz mais alta, não surtia certa autoridade na sala, a relações entre alunos é mais agressiva e violenta, tanto em palavras quanto em atitudes físicas, o ambiente da sala de difícil controle por conta das rivalidades entre os alunos do sexo masculino. A faixa etária das duas turmas englobam alunos de 10 a 12 anos, majoritariamente negros.
+
+Durante o estágio introduzimos o conceito de Ritmo, pulso, figuras rítmicas, instrumentos de precursão, composição e performasse, trabalhei com o objetivo de que ao final do estágio os alunos deveriam apresentar uma música utilizando a voz acompanhada por instrumentos percussivos feitos por mim.` },
     ],
   },
 
@@ -117,7 +119,7 @@ window.CONTEUDO = {
   'introducao-leituras': {
     resumo: '',             // frase curta que aparece na lista da Introdução
     blocos: [
-      { tipo: 'texto', texto: `` },
+      { tipo: 'texto', texto: `Durante as aulas de estágios dada pela professora Jéssica de Almeida, e os mestrandos Alexa, Rodrigo e Arthur tivemos contato com várias metodologias para instigar a escrita, a leitura, reflexões, desejos e projetos. Em nossas primeiras aulas de estágios tivemos a oportunidade de aprofundar na leitura de Arroyo, com debates e discursões com o intuito de instigar a profundidade. Outra metodologia usada foi a construção de resenhas e textos reflexivos tanto do nosso saber pessoal, quando baseada em leituras que os próprios professores traziam. Pudemos desbravas métodos de linguagem como poemas, canções, vídeos e cartas, além de lermos artigos e portifólios desenvolvidos por eles para nos darem ideias e destravar a criatividade.` },
     ],
   },
 
