@@ -257,3 +257,15 @@
 .tamanhos button[aria-pressed="true"]{ background:var(--escuro); border-color:var(--escuro); color:#fff; }
 .tam-ic{ display:inline-block; height:12px; border-radius:2px; background:currentColor; opacity:.55; }
 .tam-ic-pequena{ width:8px; } .tam-ic-media{ width:13px; } .tam-ic-grande{ width:18px; } .tam-ic-total{ width:24px; }
+
+/* subpáginas */
+.sub-linha{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.sub-linha .cx{ flex:1; min-width:180px; }
+.sub-linha .cx input{ font:inherit; font-size:15.5px; border:1px solid var(--borda); border-radius:9px; padding:9px 12px; background:var(--branco); width:100%; }
+.sub-n{ width:32px; height:32px; border:1px solid var(--medio-f); color:var(--medio-f); font-size:12px; font-weight:700;
+  display:inline-flex; align-items:center; justify-content:center; flex:none; }
+.nova-sub{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.nova-sub input{ flex:1; min-width:200px; font:inherit; font-size:15px; border:1px solid var(--borda); border-radius:9px; padding:9px 12px; background:var(--branco); }
+.nova-sub input:focus, .sub-linha .cx input:focus{ outline:none; border-color:var(--medio); box-shadow:0 0 0 3px rgba(110,145,102,.18); }
+.sub-item{ align-items:center; }
+.sub-item .acoes-item{ flex-direction:row; }

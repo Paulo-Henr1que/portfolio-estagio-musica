@@ -327,12 +327,13 @@ function pagIndice (s) {
       nome: vazio(fd.titulo) ? (f.rotulo || f.titulo) : fd.titulo,
       meta: [fd.data, fd.turma, fd.tema].filter(x => !vazio(x)).join(' · '),
       res: fd.resumo || f.dica || '',
-      pendente: vazio(fd.resumo) && vazio(fd.titulo) && !(f.dica && temTexto(fd)),
+      pendente: vazio(fd.resumo) && vazio(fd.titulo) && !temTexto(fd),
     }
   }))
 
   return `<div class="contem"><div class="pagina">
     <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
+    ${renderCampos(s.campos, d)}
     ${s.semAbertura && !renderBlocos(d.blocos) ? '' : `<div class="cartao corpo">
       ${renderBlocos(d.blocos) || vazioAviso({
         titulo: 'Introdução desta seção',
@@ -653,6 +654,7 @@ function aplicarConteudo (d) {
   if (!d || d.vazio || !d.conteudo) return
   window.CONTEUDO = d.conteudo
   if (d.planos) window.PLANOS = d.planos
+  window.montarSecoes(window.CONTEUDO) // subpáginas criadas no painel
 }
 
 async function buscarPublicado () {
@@ -671,6 +673,7 @@ async function buscarPublicado () {
 const PREVIA = new URLSearchParams(location.search).has('previa')
 
 ;(async function iniciar () {
+  window.montarSecoes(window.CONTEUDO)
   montarTopo()
   montarMenu()
   window.addEventListener('hashchange', render)

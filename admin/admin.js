@@ -8,8 +8,16 @@ import { upload } from './blob-client.js'
 
 const $ = (s, r = document) => r.querySelector(s)
 const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname)
-const SECOES = window.SECOES
-const secao = (id) => SECOES.find(s => s.id === id)
+// A lista de páginas muda quando se cria uma subpágina: sempre a atual.
+const secao = (id) => window.SECOES.find(s => s.id === id)
+// remonta a estrutura a partir do rascunho e atualiza a lista lateral
+function atualizarEstrutura () {
+  window.montarSecoes(estado.conteudo)
+  montarLista()
+  document.querySelectorAll('#lista-secoes a').forEach(a =>
+    a.dataset.id === atual ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'))
+  $('#sel-secao').value = atual
+}
 
 // ── Estado ─────────────────────────────────────────────────────────
 let estado = null          // { conteudo, planos } em edição
@@ -198,7 +206,7 @@ async function enviarVarios (arqs, aoEnviar, { bt, barra, txt }) {
 function montarLista () {
   const ul = $('#lista-secoes'); ul.innerHTML = ''
   const sel = $('#sel-secao'); sel.innerHTML = ''
-  for (const s of SECOES) {
+  for (const s of window.SECOES) {
     if (s.pai) continue
     const nome = s.menuTitulo || s.titulo
     ul.append(h('li', { class: s.filhos ? 'grupo' : '' }, h('a', { href: '#' + s.id, 'data-id': s.id }, nome)))
@@ -239,6 +247,16 @@ function desenharEditor () {
   else if (estado.planos[s.id]) partes.push(editorPlano(s))
   else {
     const d = dadosDe(s.id)
+    if (s.subpaginas) partes.push(editorSubpaginas(s))
+    if (s.criada) {
+      const p = paginasDe(s.pai).find(x => x.id === s.id)
+      if (p) {
+        const tit = campo('Título da página', p, 'titulo')
+        tit.querySelector('input').addEventListener('change', () => atualizarEstrutura())
+        partes.push(h('section', { class: 'ed-parte' }, h('h2', {}, 'Nome da página'),
+          h('p', { class: 'dica' }, 'Aparece no alto da página e na lista de ' + pai.titulo.toLowerCase() + '.'), tit))
+      }
+    }
     if (s.campos || s.pai) {
       const g = h('div', { class: 'grade-campos' },
         (s.campos || []).map(([k, rot]) => campo(rot, d, k)))
@@ -246,12 +264,75 @@ function desenharEditor () {
       partes.push(h('section', { class: 'ed-parte' }, h('h2', {}, 'Informações'), g))
     }
     partes.push(editorBlocos(d, {
-      titulo: s.filhos ? 'Texto de abertura' : 'Conteúdo da página',
-      dica: s.filhos ? 'Aparece no alto da página, antes da lista.' : s.dica ? 'O que escrever: ' + s.dica : 'Textos, fotos, vídeos e documentos, na ordem em que aparecem no site.',
+      titulo: s.filhos ? 'Texto de abertura (opcional)' : 'Conteúdo da página',
+      dica: s.filhos ? 'Aparece no alto da página, antes da lista. Vazio, não aparece.' : s.dica ? 'O que escrever: ' + s.dica : 'Textos, fotos, vídeos e documentos, na ordem em que aparecem no site.',
     }))
   }
 
   ed.replaceChildren(...partes)
+}
+
+// ── Subpáginas ─────────────────────────────────────────────────────
+// A lista fica em conteudo[secao].paginas. Na primeira mudança, a lista
+// padrão (ex.: os 4 tópicos da Introdução) é copiada para lá.
+function paginasDe (paiId) {
+  const d = dadosDe(paiId)
+  if (!Array.isArray(d.paginas)) {
+    d.paginas = (secao(paiId).filhos || []).map(f => ({ id: f.id, titulo: f.titulo, ...(f.dica ? { dica: f.dica } : {}) }))
+  }
+  return d.paginas
+}
+
+const slug = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'pagina'
+
+function editorSubpaginas (s) {
+  const sec = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Subpáginas'),
+    h('p', { class: 'dica' }, 'Cada subpágina tem o próprio texto, fotos, vídeos e documentos. Com pelo menos uma, '
+      + (s.menuTitulo || s.titulo) + ' vira uma lista para acessar cada parte, como na Introdução.'))
+  const caixa = h('div'); sec.append(caixa)
+  const desenhar = () => {
+    const lista = (secao(s.id).filhos || []).map(f => ({ id: f.id, titulo: f.titulo }))
+    const itens = lista.length
+      ? h('div', { class: 'itens' }, lista.map((p, i) => {
+          const nome = h('input', { 'aria-label': 'Nome da subpágina ' + (i + 1) })
+          nome.value = p.titulo || ''
+          nome.addEventListener('input', () => { paginasDe(s.id)[i].titulo = nome.value; mudou() })
+          nome.addEventListener('change', () => atualizarEstrutura())
+          return h('div', { class: 'item sub-item' },
+            h('div', { class: 'sub-linha' },
+              h('span', { class: 'sub-n' }, String(i + 1).padStart(2, '0')),
+              h('label', { class: 'cx' }, nome),
+              h('a', { class: 'bt leve pequeno', href: '#' + p.id }, 'Editar conteúdo →')),
+            h('div', { class: 'acoes-item' },
+              icBt('cima', 'Subir', () => { mover(paginasDe(s.id), i, -1); atualizarEstrutura(); desenhar() }, { disabled: i === 0 }),
+              icBt('baixo', 'Descer', () => { mover(paginasDe(s.id), i, 1); atualizarEstrutura(); desenhar() }, { disabled: i === lista.length - 1 }),
+              icBt('lixo', 'Remover subpágina', async () => {
+                if (!(await confirmar('Remover “' + (p.titulo || 'subpágina') + '”?', 'A página e todo o conteúdo dela saem do site quando você publicar.'))) return
+                paginasDe(s.id).splice(i, 1); delete estado.conteudo[p.id]
+                mudou(); atualizarEstrutura(); desenhar()
+              })))
+        }))
+      : h('div', { class: 'vazio-blocos' }, 'Nenhuma subpágina. A seção aparece como uma página única.')
+    const novo = h('input', { placeholder: 'Nome da nova subpágina', 'aria-label': 'Nome da nova subpágina' })
+    const criar = () => {
+      const titulo = novo.value.trim()
+      if (!titulo) { novo.focus(); return }
+      const pags = paginasDe(s.id)
+      let id = s.id + '-' + slug(titulo), n = 2
+      while (secao(id) || estado.conteudo[id]) id = s.id + '-' + slug(titulo) + '-' + n++
+      pags.push({ id, titulo })
+      estado.conteudo[id] = { resumo: '', blocos: [] }
+      mudou(); atualizarEstrutura(); desenhar()
+      avisar('Subpágina criada. Clique em “Editar conteúdo” para escrever nela.')
+    }
+    novo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); criar() } })
+    caixa.replaceChildren(itens, h('div', { class: 'nova-sub' }, novo,
+      h('button', { type: 'button', class: 'chip', html: ic('mais') + ' Adicionar subpágina', onclick: criar })))
+  }
+  desenhar()
+  return sec
 }
 
 function editorInicio (s) {
@@ -525,7 +606,7 @@ function mudou () {
 // Deixa toda página com a mesma forma (listas existentes, sem os modelos
 // vazios do arquivo original), para "sem alterações" ser comparável.
 function normalizar (base) {
-  for (const s of SECOES) {
+  for (const s of window.SECOES) {
     const d = (base.conteudo[s.id] = base.conteudo[s.id] || {})
     if (s.blocos) {
       d.blocos = (d.blocos || []).filter(b => b && b.tipo && !(b.tipo === 'texto' && !String(b.texto || '').trim()))
@@ -543,6 +624,7 @@ async function carregar () {
   const base = d && !d.vazio && d.conteudo
     ? { conteudo: d.conteudo, planos: d.planos || {} }
     : { conteudo: copia(window.CONTEUDO || {}), planos: copia(window.PLANOS || {}) }
+  window.montarSecoes(base.conteudo)
   normalizar(base)
   publicado = JSON.stringify(base)
   estado = copia(base)
@@ -550,7 +632,7 @@ async function carregar () {
   try {
     const r = JSON.parse(localStorage.getItem(RASCUNHO) || 'null')
     if (r && r.estado && JSON.stringify(r.estado) !== publicado) {
-      if (r.base === publicado) { estado = r.estado; avisar('Recuperamos as alterações que você não tinha publicado.') }
+      if (r.base === publicado) { estado = r.estado; window.montarSecoes(estado.conteudo); avisar('Recuperamos as alterações que você não tinha publicado.') }
       else localStorage.removeItem(RASCUNHO)
     }
   } catch {}
@@ -729,7 +811,8 @@ document.querySelectorAll('.previa-tam button').forEach(b => b.addEventListener(
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#previa').hidden) fecharPrevia() })
 $('#bt-descartar').addEventListener('click', async () => {
   if (!(await confirmar('Descartar as alterações?', 'Tudo volta a ser como está publicado no site.', 'Descartar'))) return
-  estado = JSON.parse(publicado); mudou(); desenharEditor()
+  estado = JSON.parse(publicado); mudou(); atualizarEstrutura()
+  if (!secao(atual)) location.hash = 'inicio'; else desenharEditor()
 })
 window.addEventListener('hashchange', () => estado && abrir(location.hash.slice(1)))
 window.addEventListener('beforeunload', (e) => { if (sujo()) { e.preventDefault(); e.returnValue = '' } })

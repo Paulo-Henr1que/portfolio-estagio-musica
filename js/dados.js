@@ -72,10 +72,14 @@ const TOPICOS_INTRODUCAO = [
 // ── Montagem das seções ────────────────────────────────────────────
 const S = (id, titulo, extra = {}) => ({ id, titulo, blocos: true, ...extra })
 
-// cada tópico da Introdução é uma página própria (id: introducao-contexto-do-estagio…)
-const introducao = TOPICOS_INTRODUCAO.map(([k, titulo, dica], i) => S(
-  'introducao-' + k, titulo, { pai: 'introducao', ordem: i + 1, dica }
-))
+// Subpáginas padrão da Introdução: cada tópico é uma página própria.
+const PAGINAS_PADRAO = {
+  introducao: TOPICOS_INTRODUCAO.map(([k, titulo, dica]) => ({ id: 'introducao-' + k, titulo, dica })),
+}
+
+// Seções em que o painel pode criar, renomear e remover subpáginas.
+// A lista fica no conteúdo (conteudo[secao].paginas); sem ela, vale o padrão.
+const COM_SUBPAGINAS = ['biografia', 'escola', 'introducao', 'consideracoes']
 
 const observacoes = [1, 2, 3].map(n => S(
   'observacao-' + n, 'Relato de Observação ' + n,
@@ -92,30 +96,47 @@ const relatos = [1, 2, 3, 4, 5, 6, 7].map(n => S(
   { campos: CAMPOS_RELATO_AULA, pai: 'relatos', ordem: n, rotulo: 'Relato de aula' }
 ))
 
-window.SECOES = [
-  { id: 'inicio', titulo: 'Início', menu: true,
-    campos: IDENTIFICACAO, campoTitulo: true, blocos: true, documentos: true },
+// Seção que aceita subpáginas: sem nenhuma, é uma página comum; com
+// subpáginas, vira um índice (texto de abertura opcional + lista).
+function comSubpaginas (sec, conteudo) {
+  const salvas = conteudo && conteudo[sec.id] && conteudo[sec.id].paginas
+  const lista = (Array.isArray(salvas) ? salvas : PAGINAS_PADRAO[sec.id] || []).filter(p => p && p.id)
+  const filhos = lista.map((p, i) => S(p.id, p.titulo || 'Página sem título',
+    { pai: sec.id, ordem: i + 1, dica: p.dica || '', criada: true }))
+  return [{ ...sec, subpaginas: true, semAbertura: true, filhos: filhos.length ? filhos : undefined }, ...filhos]
+}
 
-  S('biografia', 'Biografia', { menu: true }),
+// Monta a lista de páginas do site. O site e o painel chamam de novo
+// sempre que o conteúdo muda (por exemplo, ao criar uma subpágina).
+window.montarSecoes = function (conteudo) {
+  const c = conteudo || window.CONTEUDO || {}
+  const sub = (s) => COM_SUBPAGINAS.includes(s.id) ? comSubpaginas(s, c) : [s]
+  window.SECOES = [
+    { id: 'inicio', titulo: 'Início', menu: true,
+      campos: IDENTIFICACAO, campoTitulo: true, blocos: true, documentos: true },
 
-  S('escola', 'Dados da Escola', { menu: true, menuTitulo: 'A Escola', campos: CAMPOS_ESCOLA }),
+    ...sub(S('biografia', 'Biografia', { menu: true })),
 
-  S('introducao', 'Introdução', { menu: true, filhos: introducao, semAbertura: true }),
-  ...introducao,
+    ...sub(S('escola', 'Dados da Escola', { menu: true, menuTitulo: 'A Escola', campos: CAMPOS_ESCOLA })),
 
-  S('observacoes', 'Relatos de Observação', { menu: true, menuTitulo: 'Observações', filhos: observacoes }),
-  ...observacoes,
+    ...sub(S('introducao', 'Introdução', { menu: true })),
 
-  S('planos', 'Planos de Aula', { menu: true, filhos: planos }),
-  ...planos,
+    S('observacoes', 'Relatos de Observação', { menu: true, menuTitulo: 'Observações', filhos: observacoes }),
+    ...observacoes,
 
-  S('relatos', 'Relatos das Aulas', { menu: true, menuTitulo: 'Relatos de Aula', filhos: relatos }),
-  ...relatos,
+    S('planos', 'Planos de Aula', { menu: true, filhos: planos }),
+    ...planos,
 
-  S('consideracoes', 'Minhas Reflexões e Observações', { menu: true, menuTitulo: 'Reflexões' }),
+    S('relatos', 'Relatos das Aulas', { menu: true, menuTitulo: 'Relatos de Aula', filhos: relatos }),
+    ...relatos,
 
-  { id: 'bibliografia', titulo: 'Bibliografia', menu: true, referencias: true },
-]
+    ...sub(S('consideracoes', 'Minhas Reflexões e Observações', { menu: true, menuTitulo: 'Reflexões' })),
+
+    { id: 'bibliografia', titulo: 'Bibliografia', menu: true, referencias: true },
+  ]
+  return window.SECOES
+}
+window.montarSecoes()
 
 window.secao = (id) => window.SECOES.find(s => s.id === id)
 
