@@ -100,7 +100,7 @@ window.SECOES = [
 
   S('escola', 'Dados da Escola', { menu: true, menuTitulo: 'A Escola', campos: CAMPOS_ESCOLA }),
 
-  S('introducao', 'Introdução', { menu: true, filhos: introducao }),
+  S('introducao', 'Introdução', { menu: true, filhos: introducao, semAbertura: true }),
   ...introducao,
 
   S('observacoes', 'Relatos de Observação', { menu: true, menuTitulo: 'Observações', filhos: observacoes }),

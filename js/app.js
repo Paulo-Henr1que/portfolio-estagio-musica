@@ -332,12 +332,12 @@ function pagIndice (s) {
 
   return `<div class="contem"><div class="pagina">
     <header><h2 class="titulo">${esc(s.titulo)}</h2></header>
-    <div class="cartao corpo">
+    ${s.semAbertura && !renderBlocos(d.blocos) ? '' : `<div class="cartao corpo">
       ${renderBlocos(d.blocos) || vazioAviso({
         titulo: 'Introdução desta seção',
         texto: 'O texto de abertura desta seção ainda será escrito.',
       })}
-    </div>
+    </div>`}
     <h3 class="sub">Acessar</h3>
     ${cartoes}
   </div></div>`

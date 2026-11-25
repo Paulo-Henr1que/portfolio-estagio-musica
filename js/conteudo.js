@@ -91,15 +91,15 @@ window.CONTEUDO = {
 
   // ── Introdução › Contexto do Estágio ─────────────────────
   'introducao-contexto-do-estagio': {
-    resumo: '',             // frase curta que aparece na lista da Introdução
+    resumo: 'O primeiro estágio, no conservatório da Escola Adventista do Gama.',             // frase curta que aparece na lista da Introdução
     blocos: [
-      { tipo: 'texto', texto: `` },
+      { tipo: 'texto', texto: `Durante meu projeto de estágio, tive oportunidade de acompanhar o conservatório de música realizado na Escola Adventista do Gama - DF, minha observação durou 4 semanas, sendo meu primeiro contato com a experiência de estágio. Observei a aula do professor Ricieri, com seu aluno Daniel no instrumento Piano. Realizei nesse estágio a construção de um projeto que tinha como objetivo criar um método de ensino musical que juntasse a técnica do conservatório com a realidade e o dia a dia dos estudantes, ajudando os alunos a pensarem por si mesmos e a tocarem com liberdade e consciência, respeitando o processo de cada aluno ou grupo, dando qualidade no ritmo e solfejo.` },
     ],
   },
 
   // ── Introdução › Contexto deste Estágio ──────────────────
   'introducao-contexto-deste-estagio': {
-    resumo: '',             // frase curta que aparece na lista da Introdução
+    resumo: 'O estágio no CEF Tamanduá: rotina, observação e regência.',             // frase curta que aparece na lista da Introdução
     blocos: [
       { tipo: 'texto', texto: `Nesse último estágio, frequentei a escola CEF Tamanduá, situada na Ponte Alta Norte (Gama – DF). Compareci a escola uma vez por semana, sendo toda terça no período vespertino. Durante as três primeiras semanas observei a aula dada pelo professor, e após o período de observação, conduzi duas turmas no ensino de introdução a música. Nas quintas tínhamos a aula presencial de Estágio, em que nos era orientado como observar, escrever, atuar, pensar, ler, dentre outros aspectos necessários para o estágio e a vida acadêmica/profissional.` },
     ],
@@ -107,7 +107,7 @@ window.CONTEUDO = {
 
   // ── Introdução › As Turmas ───────────────────────────────
   'introducao-turmas': {
-    resumo: '',             // frase curta que aparece na lista da Introdução
+    resumo: 'Os 5º anos A e B e o que foi trabalhado com eles.',             // frase curta que aparece na lista da Introdução
     blocos: [
       { tipo: 'texto', texto: `As turmas que tive oportunidade de acompanhar e ensinar foram as do 5º Ano "A" e "B" do CEF Tamanduá. Somente há duas turmas de 5º ano na escola, por ser um ambiente rural a escola é considerada pequena. O 5º ano B era composto por 20 alunos e sua professora regente é a Carla. A didática usada pela professora desenvolve o contato entre aluno e professor, instigando a curiosidade, a conversa e a afetividade, com um vocabulário mais próximo para cativar o aluno, seu método de disciplina era a conversa, os alunos apresentavam um certo respeito por ela, os alunos demonstravam um bom convívio, mas ainda teve casos de brincadeiras verbais inadequadas. Já o 5º ano A é composto por 16 alunos, e a professora regente é a Lenir, sua didática envolve copiar no quadro e os alunos escreverem no caderno, não tinha tanto contato com a turma, desenvolvia jogos para trazer dinâmicas as aulas, a disciplina era desenvolvida a voz mais alta, não surtia certa autoridade na sala, a relações entre alunos é mais agressiva e violenta, tanto em palavras quanto em atitudes físicas, o ambiente da sala de difícil controle por conta das rivalidades entre os alunos do sexo masculino. A faixa etária das duas turmas englobam alunos de 10 a 12 anos, majoritariamente negros.
 
@@ -117,7 +117,7 @@ Durante o estágio introduzimos o conceito de Ritmo, pulso, figuras rítmicas, i
 
   // ── Introdução › Leituras e Reflexões ────────────────────
   'introducao-leituras': {
-    resumo: '',             // frase curta que aparece na lista da Introdução
+    resumo: 'As leituras e atividades das aulas de estágio.',             // frase curta que aparece na lista da Introdução
     blocos: [
       { tipo: 'texto', texto: `Durante as aulas de estágios dada pela professora Jéssica de Almeida, e os mestrandos Alexa, Rodrigo e Arthur tivemos contato com várias metodologias para instigar a escrita, a leitura, reflexões, desejos e projetos. Em nossas primeiras aulas de estágios tivemos a oportunidade de aprofundar na leitura de Arroyo, com debates e discursões com o intuito de instigar a profundidade. Outra metodologia usada foi a construção de resenhas e textos reflexivos tanto do nosso saber pessoal, quando baseada em leituras que os próprios professores traziam. Pudemos desbravas métodos de linguagem como poemas, canções, vídeos e cartas, além de lermos artigos e portifólios desenvolvidos por eles para nos darem ideias e destravar a criatividade.` },
     ],
