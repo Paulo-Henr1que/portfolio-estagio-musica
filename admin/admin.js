@@ -485,6 +485,7 @@ function corpoBloco (b) {
     case 'video': return [...editorVideo(b), opcaoRetratil(b)]
     case 'pdf': return [
       arquivoPdf(b, 'url'),
+      formatoPdf(b),
       h('div', { class: 'grade-campos' },
         campo('Legenda (opcional)', b, 'legenda'),
         campo('Link do Google Drive (opcional)', b, 'drive', { ph: 'https://drive.google.com/…' })),
@@ -569,6 +570,20 @@ function editorImagem (b) {
 // Tamanho da foto na página. A miniatura do lado não muda; use a
 // pré-visualização para ver como fica no site.
 const TAMANHOS = [['pequena', 'Pequena'], ['media', 'Média'], ['grande', 'Grande'], ['total', 'Largura total']]
+// PDF aberto na página ou só como cartão com botão de baixar
+function formatoPdf (b) {
+  const grupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': 'Formato do PDF' })
+  const nome = campo('Nome do documento (aparece no cartão)', b, 'nome', { ph: 'Ex.: Ficha de Frequência' })
+  const pintar = () => {
+    nome.hidden = b.formato !== 'botao'
+    grupo.replaceChildren(...[['aberto', 'Aberto na página'], ['botao', 'Cartão com botão Baixar']].map(([v, rot]) =>
+      h('button', { type: 'button', 'aria-pressed': String((b.formato || 'aberto') === v),
+        onclick: () => { if (v === 'aberto') delete b.formato; else b.formato = v; mudou(); pintar() } }, rot)))
+  }
+  pintar()
+  return h('div', {}, h('div', { class: 'cx' }, 'Como aparece no site', grupo), nome)
+}
+
 function escolhaTamanho (b) {
   const atual = () => b.tamanho || 'total'
   const grupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': 'Tamanho da foto' })

@@ -132,6 +132,16 @@ function renderBlocoBase (b) {
     case 'pdf':
       // Documento em PDF desenhado na página, no mesmo formato dos planos.
       if (!b.url) return ''
+      // formato "botão": só o cartão com o nome e o botão Baixar
+      if (b.formato === 'botao') return `<div class="docs pdf-bloco">
+    <div class="doc">
+      <div class="ic" style="color:var(--medio-f)">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#doc"/></svg></div>
+      <div class="txt"><b>${esc(b.nome || b.legenda || 'Documento')}</b>
+        ${b.nome && b.legenda ? `<span>${esc(b.legenda)}</span>` : ''}</div>
+      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener">Abrir</a>
+      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener" download>Baixar</a>
+    </div></div>`
       return `<figure class="pdf-bloco">
         <div class="pl-doc" data-pdf="${esc(b.url)}">
           <div class="pl-folhas"><p class="pl-carregando">Carregando o documento…</p></div>

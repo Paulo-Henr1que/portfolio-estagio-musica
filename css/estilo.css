@@ -670,3 +670,5 @@ figure.foto.tam-media.lado-esq, figure.foto.tam-media.lado-dir{ max-width:min(42
   .campos .campo{ border-bottom:1px solid var(--borda); }
   .campos .campo:last-child{ border-bottom:0; }
 }
+
+.docs.pdf-bloco .doc .bt + .bt{ margin-left:8px; }
