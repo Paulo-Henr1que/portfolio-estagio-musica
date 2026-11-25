@@ -334,7 +334,17 @@ function desenharEditor (animar) {
 }
 
 // Troca o conteúdo do editor; ao mudar de página, as partes entram em sequência.
+// Ao trocar de página: a atual some devagar e a nova entra em sequência.
+let trocaEditor = null
 function mostrarEditor (ed, partes, animar) {
+  clearTimeout(trocaEditor)
+  const calmo = matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (!animar || calmo || !ed.children.length) return entrarEditor(ed, partes, animar)
+  ed.classList.remove('entra'); ed.classList.add('sai')
+  trocaEditor = setTimeout(() => entrarEditor(ed, partes, true), 260)
+}
+function entrarEditor (ed, partes, animar) {
+  ed.classList.remove('sai')
   ed.replaceChildren(...partes)
   if (!animar) return
   ed.classList.remove('entra'); void ed.offsetWidth; ed.classList.add('entra')
@@ -1277,10 +1287,16 @@ function abrirPrevia (paraPublicar, destaque) {
   } else enviar()
   $('#previa-voltar').focus()
 }
+// Fecha a pré-visualização com uma saída suave (some e desce de leve).
 function fecharPrevia () {
-  $('#previa').hidden = true
-  document.body.style.overflow = ''
-  $('#bt-previa').focus()
+  const p = $('#previa')
+  if (p.hidden || p.classList.contains('fechando')) return
+  p.classList.add('fechando')
+  setTimeout(() => {
+    p.hidden = true; p.classList.remove('fechando')
+    document.body.style.overflow = ''
+    $('#bt-previa').focus({ preventScroll: true })
+  }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 380)
 }
 
 async function publicar () {

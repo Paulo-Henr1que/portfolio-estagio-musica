@@ -499,3 +499,27 @@
   .bloco-cab .ver-no-site span, .item-cab .ver-no-site span, .sub-linha .ver-no-site span{ display:none; }
   .bloco-cab .ver-no-site, .item-cab .ver-no-site{ width:34px; height:34px; padding:0; justify-content:center; }
 }
+
+/* ── Animações mais calmas ── */
+@keyframes previa-entra{ from{ opacity:0; transform:translateY(18px) scale(.985); } to{ opacity:1; transform:none; } }
+@keyframes previa-sai{ from{ opacity:1; transform:none; } to{ opacity:0; transform:translateY(18px) scale(.985); } }
+@keyframes editor-sai{ from{ opacity:1; transform:none; } to{ opacity:0; transform:translateY(-8px); } }
+.previa-tela:not([hidden]){ animation:previa-entra .5s var(--suave) both; }
+.previa-tela.fechando{ animation:previa-sai .38s ease-in both; pointer-events:none; }
+.p-editor.sai > *{ animation:editor-sai .26s ease-in both; }
+.p-editor.entra > *{ animation:sobe .8s var(--suave) both; }
+.p-editor.entra > :nth-child(2){ animation-delay:.09s; }
+.p-editor.entra > :nth-child(3){ animation-delay:.18s; }
+.p-editor.entra > :nth-child(4){ animation-delay:.27s; }
+.p-editor.entra > :nth-child(n+5){ animation-delay:.34s; }
+#lista-secoes .filhos-cx{ transition:grid-template-rows .65s var(--suave); }
+#lista-secoes .grupo > a::before{ transition:transform .55s var(--suave); }
+#lista-secoes a{ transition:background .3s, color .3s, padding .4s var(--suave), box-shadow .3s; }
+.aparencia-bloco > summary::before{ transition:transform .45s var(--suave); }
+.aparencia-bloco[open] .aparencia-corpo{ animation:sobe .55s var(--suave) both; }
+.janela[open]{ animation:surge .42s var(--suave); }
+.janela[open]::backdrop{ animation:fundo .4s ease; }
+.menu-conta:not([hidden]){ animation:surge .3s var(--suave); }
+.aviso-flut:not([hidden]){ animation:aviso .45s var(--suave); }
+.bloco.novo{ animation:surge .6s var(--suave) both, brilho 1.4s .3s ease-out; }
+.retratil-op > *, .cores-proprias:not([hidden]){ animation:sobe .5s var(--suave) both; }
