@@ -449,3 +449,36 @@
 .aparencia-bloco > summary:hover{ background:var(--pastel); border-radius:10px; }
 .aparencia-corpo{ padding:4px 14px 14px; display:flex; flex-direction:column; gap:12px; }
 .aparencia-bloco[open] .aparencia-corpo{ animation:sobe .3s var(--suave) both; }
+
+/* ── Listas (documentos, referências): cabeçalho + corpo ── */
+.item.lista-item{ display:block; padding:0; overflow:hidden; }
+.item-cab{ display:flex; align-items:center; gap:8px; padding:6px 8px 6px 14px; border-bottom:1px solid var(--borda); background:var(--branco); }
+.item-cab .tipo{ flex:1; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--medio-f); }
+.item-cab .acoes-item{ display:flex; flex-direction:row; gap:2px; }
+.item-corpo{ padding:14px; display:flex; flex-direction:column; gap:12px; }
+.item-corpo .grade-campos{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+
+/* ── Arquivo PDF: uma linha só ── */
+.arquivo{ display:flex; align-items:center; gap:12px; border:1px solid var(--borda); border-radius:12px;
+  background:var(--creme); padding:10px 10px 10px 12px; min-width:0; }
+.arquivo.vazio{ border-style:dashed; background:var(--branco); }
+.arq-ic{ width:40px; height:40px; border-radius:10px; background:var(--branco); border:1px solid var(--borda);
+  display:inline-flex; align-items:center; justify-content:center; color:var(--medio-f); flex:none; }
+.arq-ic svg{ width:20px; height:20px; }
+.arq-txt{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.arq-txt b{ font-size:14.5px; color:var(--escuro); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.arq-txt small{ font-size:12.5px; color:var(--tinta-2); }
+.arq-acoes{ display:flex; align-items:center; gap:6px; flex:none; }
+.arq-acoes .enviar-cx{ display:flex; flex-direction:column; gap:4px; }
+.arq-acoes .envio-txt{ display:none; }
+.arq-acoes .progresso{ width:100%; }
+@media (max-width:560px){
+  .arquivo{ flex-wrap:wrap; }
+  .arq-txt{ flex-basis:calc(100% - 52px); }
+  .arq-acoes{ width:100%; }
+  .arq-acoes > *{ flex:1; }
+  .arq-acoes .bt{ width:100%; justify-content:center; }
+  .item-corpo{ padding:12px; }
+}
+
+@media (max-width:560px){ .aparencia-bloco > summary small{ display:none; } }

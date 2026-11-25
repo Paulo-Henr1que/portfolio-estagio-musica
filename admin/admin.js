@@ -424,7 +424,7 @@ function editorInicio (s) {
         campo('Nome do documento', doc, 'nome', { ph: 'Ficha de frequência assinada' }),
         campo('Descrição (opcional)', doc, 'descricao')),
       arquivoPdf(doc, 'url'),
-    ], () => ({ nome: '', descricao: '', url: '' }), 'Adicionar documento'))
+    ], () => ({ nome: '', descricao: '', url: '' }), 'Adicionar documento', 'Documento'))
   return [ident, sobre, docs]
 }
 
@@ -449,22 +449,24 @@ function editorBibliografia () {
     listaItens(d.referencias, (r) => [
       campo('Referência', r, 'texto', { area: true, linhas: 2, ph: 'SOBRENOME, Nome. Título da obra. Cidade: Editora, 2020.' }),
       campo('Link (opcional)', r, 'link', { ph: 'https://…' }),
-    ], () => ({ texto: '', link: '' }), 'Adicionar referência'))
+    ], () => ({ texto: '', link: '' }), 'Adicionar referência', 'Referência'))
 }
 
 // Lista genérica: cada item com subir, descer e remover.
-function listaItens (lista, montar, novo, rotuloNovo) {
+function listaItens (lista, montar, novo, rotuloNovo, rotulo = 'Item') {
   const caixa = h('div')
   const desenhar = () => {
     const itens = lista.length
-      ? h('div', { class: 'itens' }, lista.map((it, i) => h('div', { class: 'item' },
-          h('div', { class: 'bloco-corpo', style: 'padding:0' }, montar(it)),
+      ? h('div', { class: 'itens' }, lista.map((it, i) => h('div', { class: 'item lista-item' },
+          h('div', { class: 'item-cab' },
+            h('span', { class: 'tipo' }, rotulo + ' ' + (i + 1)),
           h('div', { class: 'acoes-item' },
             icBt('cima', 'Subir', () => { mover(lista, i, -1); desenhar() }, { disabled: i === 0 }),
             icBt('baixo', 'Descer', () => { mover(lista, i, 1); desenhar() }, { disabled: i === lista.length - 1 }),
             icBt('lixo', 'Remover', async () => {
               if (await confirmar('Remover este item?', 'Ele sai do site quando você publicar.')) { lista.splice(i, 1); mudou(); desenhar() }
-            })))))
+            }))),
+          h('div', { class: 'item-corpo' }, montar(it)))))
       : h('div', { class: 'vazio-blocos' }, 'Nenhum item ainda.')
     caixa.replaceChildren(itens, h('div', { class: 'adicionar' },
       h('button', { type: 'button', class: 'chip', html: ic('mais') + ' ' + rotuloNovo, onclick: () => { lista.push(novo()); mudou(); desenhar() } })))
@@ -783,18 +785,29 @@ function editorGaleria (b) {
   return [campo('Legenda da galeria (opcional)', b, 'legenda'), grade, env, soltar]
 }
 
+// nome do arquivo sem o código aleatório que o armazenamento acrescenta
+const nomeArquivo = (url) => {
+  let n = String(url).split('/').pop().split('?')[0]
+  try { n = decodeURIComponent(n) } catch {}
+  return n.replace(/-[A-Za-z0-9]{20,}(?=\.\w+$)/, '').replace(/^[a-z0-9]{6,9}-(?=.)/, '')
+}
+
 function arquivoPdf (obj, chave) {
-  const vista = h('div', { class: 'midia-vista pdf' })
+  const cx = h('div', { class: 'arquivo' })
   const pintar = () => {
     const url = obj[chave]
-    vista.replaceChildren(url
-      ? h('span', {}, h('b', { style: 'color:var(--escuro)' }, decodeURIComponent(url.split('/').pop().split('?')[0])), h('br'),
-          h('a', { href: ver(url), target: '_blank', rel: 'noopener' }, 'Abrir o PDF ↗'))
-      : 'Nenhum PDF ainda')
+    cx.classList.toggle('vazio', !url)
+    cx.replaceChildren(
+      h('span', { class: 'arq-ic', html: ic('pagina') }),
+      h('div', { class: 'arq-txt' },
+        h('b', { title: url ? nomeArquivo(url) : null }, url ? nomeArquivo(url) : 'Nenhum PDF enviado'),
+        h('small', {}, url ? 'Arquivo PDF' : 'Clique em “Enviar PDF” para escolher o arquivo')),
+      h('div', { class: 'arq-acoes' },
+        url ? h('a', { class: 'bt leve pequeno', href: ver(url), target: '_blank', rel: 'noopener' }, 'Abrir ↗') : null,
+        botaoEnviar(url ? 'Trocar' : 'Enviar PDF', 'application/pdf', (u) => { obj[chave] = u; mudou(); pintar() })))
   }
   pintar()
-  return h('div', { class: 'midia-linha' }, vista, h('div', { class: 'midia-campos' },
-    botaoEnviar(obj[chave] ? 'Trocar PDF' : 'Enviar PDF', 'application/pdf', (url) => { obj[chave] = url; mudou(); pintar() })))
+  return cx
 }
 
 // ── Configurações: estágios ────────────────────────────────────────
