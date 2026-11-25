@@ -482,3 +482,20 @@
 }
 
 @media (max-width:560px){ .aparencia-bloco > summary small{ display:none; } }
+
+/* ── "Ver no site" em todas as partes ── */
+.parte-cab{ display:flex; align-items:center; justify-content:space-between; gap:8px 14px; flex-wrap:wrap; margin:0 0 4px; }
+.parte-cab h2{ font-family:var(--serif); font-weight:600; font-size:23px; color:var(--escuro); margin:0; }
+.ver-no-site{ background:var(--pastel); border-color:transparent; color:var(--medio-f); }
+.ver-no-site:hover{ background:#FFF1DC; border-color:#EBC48C; color:#8A5313; }
+.ver-no-site svg{ transition:transform .35s var(--suave); }
+.ver-no-site:hover svg{ transform:scale(1.15) rotate(45deg); }
+.bloco-cab .ver-no-site, .item-cab .ver-no-site{ background:none; padding:5px 9px; }
+.bloco-cab .ver-no-site:hover, .item-cab .ver-no-site:hover{ background:#FFF1DC; }
+.campo-com-ver{ display:flex; flex-direction:column; gap:6px; }
+.campo-com-ver .ver-no-site{ align-self:flex-start; }
+.sub-linha .ver-no-site{ flex:none; }
+@media (max-width:560px){
+  .bloco-cab .ver-no-site span, .item-cab .ver-no-site span, .sub-linha .ver-no-site span{ display:none; }
+  .bloco-cab .ver-no-site, .item-cab .ver-no-site{ width:34px; height:34px; padding:0; justify-content:center; }
+}

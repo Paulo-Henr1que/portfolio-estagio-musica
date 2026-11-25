@@ -298,7 +298,7 @@ function desenharEditor (animar) {
     h('div', {},
       pai ? h('p', { class: 'trilho' }, h('a', { href: '#' + pai.id }, pai.titulo)) : h('p', { class: 'trilho' }, 'Página'),
       h('h1', {}, s.titulo)),
-    h('a', { class: 'ver-site', href: urlSite + '#/' + s.id, target: '_blank', rel: 'noopener' }, 'Ver no site ↗')))
+    h('a', { class: 'ver-site', href: urlSite + '#/' + s.id, target: '_blank', rel: 'noopener' }, 'Abrir no site ↗')))
 
   if (s.id === 'inicio') partes.push(...editorInicio(s))
   else if (s.referencias) partes.push(editorBibliografia())
@@ -311,17 +311,20 @@ function desenharEditor (animar) {
       if (p) {
         const tit = campo('Título da página', p, 'titulo')
         tit.querySelector('input').addEventListener('change', () => atualizarEstrutura())
-        partes.push(h('section', { class: 'ed-parte' }, h('h2', {}, 'Nome da página'),
-          h('p', { class: 'dica' }, 'Aparece no alto da página e na lista de ' + pai.titulo.toLowerCase() + '.'), tit))
+        partes.push(comVer(h('section', { class: 'ed-parte' }, h('h2', {}, 'Nome da página'),
+          h('p', { class: 'dica' }, 'Aparece no alto da página e na lista de ' + pai.titulo.toLowerCase() + '.'), tit), 'titulo-' + s.id, s.id))
       }
     }
     if (s.campos || s.pai) {
       const g = h('div', { class: 'grade-campos' },
         (s.campos || []).map(([k, rot]) => campo(rot, d, k)))
-      if (s.pai) g.append(campo('Resumo', d, 'resumo', { classe: 'largo', dica: 'Frase curta que aparece na lista de ' + (pai.menuTitulo || pai.titulo).toLowerCase() + '.' }))
-      partes.push(h('section', { class: 'ed-parte' }, h('h2', {}, 'Informações'), g))
+      if (s.pai) g.append(h('div', { class: 'largo campo-com-ver' },
+        campo('Resumo', d, 'resumo', { dica: 'Frase curta que aparece na lista de ' + (pai.menuTitulo || pai.titulo).toLowerCase() + '.' }),
+        botaoVer('item-' + s.id, s.pai, 'Ver na lista')))
+      partes.push(comVer(h('section', { class: 'ed-parte' }, h('h2', {}, 'Informações'), g), (s.campos || []).length ? 'parte-campos' : 'titulo-' + s.id, s.id))
     }
     partes.push(editorBlocos(d, {
+      alvo: 'parte-corpo',
       titulo: s.filhos ? 'Texto de abertura (opcional)' : 'Conteúdo da página',
       dica: s.filhos ? 'Aparece no alto da página, antes da lista. Vazio, não aparece.' : s.dica ? 'O que escrever: ' + s.dica : 'Textos, fotos, vídeos e documentos, na ordem em que aparecem no site.',
     }))
@@ -354,7 +357,7 @@ const slug = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCa
 
 function editorSubpaginas (s) {
   const sec = h('section', { class: 'ed-parte' },
-    h('h2', {}, 'Subpáginas'),
+    h('div', { class: 'parte-cab' }, h('h2', {}, 'Subpáginas'), botaoVer('parte-indice', s.id)),
     h('p', { class: 'dica' }, 'Cada subpágina tem o próprio texto, fotos, vídeos e documentos. Com pelo menos uma, '
       + (s.menuTitulo || s.titulo) + ' vira uma lista para acessar cada parte, como na Introdução.'))
   const caixa = h('div'); sec.append(caixa)
@@ -370,6 +373,7 @@ function editorSubpaginas (s) {
             h('div', { class: 'sub-linha' },
               h('span', { class: 'sub-n' }, String(i + 1).padStart(2, '0')),
               h('label', { class: 'cx' }, nome),
+              botaoVer('item-' + p.id, s.id),
               h('a', { class: 'bt leve pequeno', href: '#' + p.id }, 'Editar conteúdo →')),
             h('div', { class: 'acoes-item' },
               icBt('cima', 'Subir', () => { mover(paginasDe(s.id), i, -1); atualizarEstrutura(); desenhar() }, { disabled: i === 0 }),
@@ -411,7 +415,9 @@ function editorInicio (s) {
       campo('Título do trabalho', d, 'titulo', { classe: 'largo', dica: 'Vazio: usa “Portfólio Reflexivo de Estágio Supervisionado em Licenciatura em Música”.' }),
       s.campos.map(([k, rot]) => campo(rot, d, k))))
 
+  comVer(ident, 'parte-ident', 'inicio')
   const sobre = editorBlocos(d, {
+    alvo: 'parte-sobre',
     titulo: 'Sobre este portfólio',
     dica: 'O texto de apresentação. Pode ter também fotos, vídeos e documentos em PDF.',
   })
@@ -424,42 +430,44 @@ function editorInicio (s) {
         campo('Nome do documento', doc, 'nome', { ph: 'Ficha de frequência assinada' }),
         campo('Descrição (opcional)', doc, 'descricao')),
       arquivoPdf(doc, 'url'),
-    ], () => ({ nome: '', descricao: '', url: '' }), 'Adicionar documento', 'Documento'))
+    ], () => ({ nome: '', descricao: '', url: '' }), 'Adicionar documento', 'Documento', (i) => ['doc-' + i, 'inicio']))
+  comVer(docs, 'parte-docs', 'inicio')
   return [ident, sobre, docs]
 }
 
 function editorPlano (s) {
   const p = estado.planos[s.id]
-  return h('section', { class: 'ed-parte' },
+  return comVer(h('section', { class: 'ed-parte' },
     h('h2', {}, 'Plano de aula'),
     h('p', { class: 'dica' }, 'A página do plano mostra o próprio arquivo PDF, folha por folha.'),
     h('div', { class: 'grade-campos' },
       campo('Título', p, 'titulo', { classe: 'largo' }),
       campo('Data', p, 'data', { ph: 'dd/mm/aaaa' }),
       campo('Link do Google Drive', p, 'drive', { ph: 'https://drive.google.com/…' })),
-    h('div', { style: 'margin-top:14px' }, arquivoPdf(p, 'arquivo')))
+    h('div', { style: 'margin-top:14px' }, arquivoPdf(p, 'arquivo'))), 'parte-plano', s.id)
 }
 
 function editorBibliografia () {
   const d = dadosDe('bibliografia')
   d.referencias = d.referencias || []
-  return h('section', { class: 'ed-parte' },
+  return comVer(h('section', { class: 'ed-parte' },
     h('h2', {}, 'Referências'),
     h('p', { class: 'dica' }, 'Escreva na ordem que quiser: o site coloca em ordem alfabética sozinho.'),
     listaItens(d.referencias, (r) => [
       campo('Referência', r, 'texto', { area: true, linhas: 2, ph: 'SOBRENOME, Nome. Título da obra. Cidade: Editora, 2020.' }),
       campo('Link (opcional)', r, 'link', { ph: 'https://…' }),
-    ], () => ({ texto: '', link: '' }), 'Adicionar referência', 'Referência'))
+    ], () => ({ texto: '', link: '' }), 'Adicionar referência', 'Referência', (i) => ['ref-' + i, 'bibliografia'])), 'parte-refs', 'bibliografia')
 }
 
 // Lista genérica: cada item com subir, descer e remover.
-function listaItens (lista, montar, novo, rotuloNovo, rotulo = 'Item') {
+function listaItens (lista, montar, novo, rotuloNovo, rotulo = 'Item', alvo = null) {
   const caixa = h('div')
   const desenhar = () => {
     const itens = lista.length
       ? h('div', { class: 'itens' }, lista.map((it, i) => h('div', { class: 'item lista-item' },
           h('div', { class: 'item-cab' },
             h('span', { class: 'tipo' }, rotulo + ' ' + (i + 1)),
+            alvo ? botaoVer(...alvo(i)) : null,
           h('div', { class: 'acoes-item' },
             icBt('cima', 'Subir', () => { mover(lista, i, -1); desenhar() }, { disabled: i === 0 }),
             icBt('baixo', 'Descer', () => { mover(lista, i, 1); desenhar() }, { disabled: i === lista.length - 1 }),
@@ -493,9 +501,11 @@ const novoBloco = (t) => ({
   video: { tipo: 'video', url: '', poster: '', drive: '', legenda: '' }, pdf: { tipo: 'pdf', url: '', drive: '', legenda: '' },
 }[t])
 
-function editorBlocos (d, { titulo, dica }) {
+function editorBlocos (d, { titulo, dica, alvo }) {
   d.blocos = d.blocos || []
+  const rota = atual
   const sec = h('section', { class: 'ed-parte' }, h('h2', {}, titulo), h('p', { class: 'dica' }, dica))
+  if (alvo) comVer(sec, alvo, rota)
   const caixa = h('div')
   sec.append(caixa)
 
@@ -505,6 +515,7 @@ function editorBlocos (d, { titulo, dica }) {
       ? h('div', { class: 'blocos' }, lista.map((b, i) => h('div', { class: 'bloco', 'data-i': i },
           h('div', { class: 'bloco-cab' },
             h('span', { class: 'tipo' }, nomeTipo(b.tipo)),
+            botaoVer('bloco-' + i, rota),
             icBt('cima', 'Subir', () => { mover(lista, i, -1); desenhar() }, { disabled: i === 0 }),
             icBt('baixo', 'Descer', () => { mover(lista, i, 1); desenhar() }, { disabled: i === lista.length - 1 }),
             icBt('lixo', 'Remover', async () => {
@@ -1235,8 +1246,15 @@ function limparParaSalvar (e) {
 let previaPronta = false
 // Botão "Ver no site": abre a pré-visualização na página certa e contorna o texto.
 function botaoVer (alvo, rota, rotulo = 'Ver no site') {
-  return h('button', { type: 'button', class: 'ver-no-site', title: 'Mostra onde isso aparece no site', html: ic('alvo') + ' ' + rotulo,
+  return h('button', { type: 'button', class: 'ver-no-site', title: 'Mostra onde isso aparece no site', html: ic('alvo') + '<span>' + rotulo + '</span>',
     onclick: () => { const r = typeof rota === 'function' ? rota() : rota; abrirPrevia(false, { rota: r || 'inicio', alvo }) } })
+}
+
+// Põe o botão "Ver no site" ao lado do título de uma parte do editor.
+function comVer (sec, alvo, rota) {
+  const t = sec.querySelector(':scope > h2')
+  if (t) t.replaceWith(h('div', { class: 'parte-cab' }, t.cloneNode(true), botaoVer(alvo, rota)))
+  return sec
 }
 
 function abrirPrevia (paraPublicar, destaque) {

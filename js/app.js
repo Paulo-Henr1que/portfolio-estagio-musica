@@ -106,6 +106,7 @@ function marcarMenu (id) {
 // Tudo vem de js/conteudo.js, carregado junto com a página.
 const dados = (id) => {
   const base = (window.CONTEUDO && window.CONTEUDO[id]) || {}
+  ;(base.blocos || []).forEach((b, i) => { if (b && typeof b === 'object') Object.defineProperty(b, '__i', { value: i, configurable: true, enumerable: false }) })
   const p = window.PLANOS && window.PLANOS[id]
   if (!p) return base
   return { ...base, titulo: p.titulo, data: p.data }
@@ -116,6 +117,16 @@ const dados = (id) => {
 // que abre e fecha (opção "Deixar retrátil" no painel).
 const TITULO_RETRATIL = { texto: 'Ver mais', citacao: 'Citação', imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo', pdf: 'Documento' }
 function renderBloco (b) {
+  return marcarBloco(b, renderBlocoRetratil(b))
+}
+function marcarBloco (b, html) {
+  if (!html || b.__i == null) return html
+  const m = 'data-texto="bloco-' + b.__i + '"'
+  // parágrafo simples: marca todos os <p> do bloco
+  if (b.tipo === 'texto' && !b.retratil && html.startsWith('<p>')) return html.split('<p>').join('<p ' + m + '>')
+  return html.replace(/^(\s*<[a-zA-Z0-9]+)/, '$1 ' + m)
+}
+function renderBlocoRetratil (b) {
   const html = renderBlocoBase(b)
   if (!html || !b.retratil || !TITULO_RETRATIL[b.tipo]) return html
   const n = b.tipo === 'galeria' ? (b.itens || []).filter(i => i.url).length : 1
@@ -215,8 +226,8 @@ const renderBlocos = (lista) =>
 // textos de tamanhos diferentes, a grade deixa buracos brancos; a lista
 // não. A marca de ensaio já diz o número, então o nome não o repete.
 function indice (itens) {
-  return `<ol class="indice">` + itens.map(i => `
-    <li><a href="#/${i.id}">
+  return `<ol class="indice" data-texto="parte-indice">` + itens.map(i => `
+    <li data-texto="item-${i.id}"><a href="#/${i.id}">
       <span class="marca">${String(i.n).padStart(2, '0')}</span>
       <span class="txt">
         <b>${esc(i.nome)}</b>
@@ -231,15 +242,15 @@ function renderCampos (defs, valores, secId) {
   const ocultos = ['titulo', 'numero']
   const itens = (defs || []).filter(([k]) => !vazio(valores[k]) && !ocultos.includes(k))
   if (!itens.length) return ''
-  return `<div class="campos">` + itens.map(([k, rot]) =>
-    `<div class="campo"><b data-texto="rot-${secId}-${k}">${esc(rot)}</b><span>${esc(valores[k])}</span></div>`).join('') + `</div>`
+  return `<div class="campos" data-texto="parte-campos">` + itens.map(([k, rot]) =>
+    `<div class="campo" data-texto="campo-${secId}-${k}"><b data-texto="rot-${secId}-${k}">${esc(rot)}</b><span>${esc(valores[k])}</span></div>`).join('') + `</div>`
 }
 
 function renderDocumentos (lista) {
   const docs = (lista || []).filter(d => d.url && d.nome)
-  if (!docs.length) return `<div class="aviso" data-texto="semDocs"><b data-texto="semDocsTit">${esc(T('semDocsTit'))}</b>${esc(T('semDocs'))}</div>`
-  return `<div class="docs">` + docs.map(d => `
-    <div class="doc">
+  if (!docs.length) return `<div class="aviso" data-texto="semDocs parte-docs"><b data-texto="semDocsTit">${esc(T('semDocsTit'))}</b>${esc(T('semDocs'))}</div>`
+  return `<div class="docs" data-texto="parte-docs">` + docs.map(d => `
+    <div class="doc" data-texto="doc-${(lista || []).indexOf(d)}">
       <div class="ic" style="color:var(--medio-f)">
         <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#doc"/></svg></div>
       <div class="txt">
@@ -259,7 +270,7 @@ function vazioAviso (o) {
 function pagInicio (s) {
   const d = dados('inicio')
   const campos = s.campos.map(([k, rot]) => `
-    <div><dt data-texto="rot-ident-${k}">${esc(rot)}</dt><span class="pont"></span>
+    <div data-texto="campo-inicio-${k}"><dt data-texto="rot-ident-${k}">${esc(rot)}</dt><span class="pont"></span>
     <dd class="${vazio(d[k]) ? 'vazio' : ''}" ${vazio(d[k]) ? 'data-texto="aPreencher"' : ''}>${vazio(d[k]) ? esc(T('aPreencher')) : esc(d[k])}</dd></div>`).join('')
 
   const atalhos = indice(window.SECOES
@@ -369,10 +380,10 @@ function pagInicio (s) {
   <div class="contem">
     <div class="pagina">
       <h3 class="sub fig fig-1" data-texto="secIdent">${esc(T('secIdent'))}</h3>
-      <dl class="ident">${campos}</dl>
+      <dl class="ident" data-texto="parte-ident">${campos}</dl>
 
       <h3 class="sub fig fig-2" data-texto="secSobre">${esc(T('secSobre'))}</h3>
-      <div class="cartao corpo">
+      <div class="cartao corpo" data-texto="parte-sobre">
         ${renderBlocos(d.blocos) || vazioAviso({
           titulo: 'Texto de apresentação',
           texto: 'Esta seção receberá a apresentação do portfólio: o que ele é, seu objetivo, o contexto do estágio, sua importância para a formação e como o material está organizado.',
@@ -413,7 +424,7 @@ function pagIndice (s) {
   return `<div class="contem"><div class="pagina">
     <header><h2 class="titulo" data-texto="titulo-${s.id}">${esc(s.titulo)}</h2></header>
     ${renderCampos(s.campos, d, s.id)}
-    ${s.semAbertura && !renderBlocos(d.blocos) ? '' : `<div class="cartao corpo">
+    ${s.semAbertura && !renderBlocos(d.blocos) ? '' : `<div class="cartao corpo" data-texto="parte-corpo">
       ${renderBlocos(d.blocos) || vazioAviso({
         titulo: 'Introdução desta seção',
         texto: 'O texto de abertura desta seção ainda será escrito.',
@@ -461,7 +472,7 @@ function pagPlano (s, p) {
       <h2 class="titulo">${esc(s.titulo)}</h2>
       <p class="pl-sub">${esc(p.titulo)} · ${esc(p.data)}</p>
     </header>
-    <div class="pl-doc" data-pdf="${esc(p.arquivo)}">
+    <div class="pl-doc" data-pdf="${esc(p.arquivo)}" data-texto="parte-plano">
       <div class="pl-folhas"><p class="pl-carregando">Carregando o plano…</p></div>
     </div>
     <p class="pl-links">
@@ -612,7 +623,7 @@ function pagSimples (s) {
       <h2 class="titulo" data-texto="titulo-${s.id}">${esc(titulo)}</h2>
     </header>
     ${renderCampos(s.campos, d, s.id)}
-    <div class="cartao corpo${s.pai === 'relatos' && temConteudo ? ' com-dobras' : ''}">
+    <div class="cartao corpo${s.pai === 'relatos' && temConteudo ? ' com-dobras' : ''}" data-texto="parte-corpo">
       ${temConteudo ? partes + corpo : vazioAviso({
         titulo: s.dica ? 'A escrever' : 'Conteúdo a inserir',
         texto: s.dica || 'Esta página está pronta e aguarda o texto, as fotografias e os vídeos.',
@@ -625,14 +636,14 @@ function pagSimples (s) {
 
 function pagBibliografia (s) {
   const d = dados('bibliografia')
-  const refs = (d.referencias || []).filter(r => !vazio(r.texto))
+  const refs = (d.referencias || []).map((r, i) => ({ ...r, i })).filter(r => !vazio(r.texto))
   // Ordem alfabética, ignorando acentos — como pede a ABNT.
   refs.sort((a, b) => a.texto.localeCompare(b.texto, 'pt-BR', { sensitivity: 'base' }))
 
   const lista = refs.length
     ? `<ol class="refs">` + refs.map(r => {
         const t = esc(r.texto)
-        return `<li>${r.link ? `${t} Disponível em:
+        return `<li data-texto="ref-${r.i}">${r.link ? `${t} Disponível em:
           <a href="${esc(r.link)}" target="_blank" rel="noopener">${esc(r.link)}</a>.` : t}</li>`
       }).join('') + `</ol>`
     : vazioAviso({
@@ -642,7 +653,7 @@ function pagBibliografia (s) {
 
   return `<div class="contem"><div class="pagina">
     <header><h2 class="titulo" data-texto="titulo-${s.id}">${esc(s.titulo)}</h2></header>
-    <div class="cartao">${lista}</div>
+    <div class="cartao" data-texto="parte-refs">${lista}</div>
   </div></div>`
 }
 
@@ -689,8 +700,10 @@ function trocar () {
 // Painel → "Ver no site": rola até o texto e o contorna por alguns segundos.
 function destacar (chave) {
   document.querySelectorAll('.destacado').forEach(x => x.classList.remove('destacado'))
-  const alvo = document.querySelector('[data-texto="' + chave + '"]')
+  const todos = [...document.querySelectorAll('[data-texto~="' + chave + '"]')]
+  const alvo = todos[0]
   if (!alvo) { window.parent.postMessage({ tipo: 'destaque-faltou', chave }, location.origin); return }
+  todos.slice(1).forEach(x => { x.classList.add('destacado'); setTimeout(() => x.classList.remove('destacado'), 4200) })
   const dob = alvo.closest('details'); if (dob) dob.open = true
   const menu = document.getElementById('menu')
   if (menu.contains(alvo) && getComputedStyle(document.getElementById('bt-menu')).display !== 'none') menu.classList.add('aberto')
