@@ -642,3 +642,15 @@ figure.foto.tam-grande{ max-width:min(760px, 100%); }
 .corpo p a:hover, .dobra-corpo p a:hover{ color:var(--escuro); }
 .dobra-corpo > .galeria:first-child{ margin-top:0; }
 .dobra-corpo > .galeria:last-child, .dobra-corpo > figure:last-child{ margin-bottom:0; }
+
+/* foto ao lado do texto */
+.corpo, .dobra-corpo{ display:flow-root; }
+figure.foto.lado-esq, figure.foto.lado-dir{ margin-top:6px; margin-bottom:14px; }
+figure.foto.lado-esq{ float:left; margin-left:0; margin-right:32px; }
+figure.foto.lado-dir{ float:right; margin-right:0; margin-left:32px; }
+figure.foto.tam-pequena.lado-esq, figure.foto.tam-pequena.lado-dir{ max-width:min(300px, 40%); }
+figure.foto.tam-media.lado-esq, figure.foto.tam-media.lado-dir{ max-width:min(420px, 50%); }
+.corpo h3, .corpo .galeria, .corpo .dobra, .corpo .pdf-bloco, .corpo figure.foto:not(.lado-esq):not(.lado-dir){ clear:both; }
+@media (max-width:640px){
+  figure.foto.lado-esq, figure.foto.lado-dir{ float:none; margin-left:auto; margin-right:auto; max-width:75% !important; }
+}

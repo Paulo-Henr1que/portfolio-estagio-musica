@@ -104,8 +104,14 @@ function renderBlocoBase (b) {
     case 'imagem':
       if (!b.url) return ''
       // tamanho escolhido no painel: pequena, media, grande ou total (padrão)
-      return `<figure class="foto tam-${['pequena','media','grande'].includes(b.tamanho) ? b.tamanho : 'total'}"><img src="${esc(b.url)}" alt="${esc(b.alt || b.legenda || '')}"
+      {
+      const tam = ['pequena','media','grande'].includes(b.tamanho) ? b.tamanho : 'total'
+      // foto pequena ou média pode ficar ao lado do texto (padrão da pequena: à esquerda)
+      const pos = (tam === 'pequena' || tam === 'media') ? (b.posicao || (tam === 'pequena' ? 'esquerda' : 'centro')) : 'centro'
+      const lado = pos === 'esquerda' ? ' lado-esq' : pos === 'direita' ? ' lado-dir' : ''
+      return `<figure class="foto tam-${tam}${lado}"><img src="${esc(b.url)}" alt="${esc(b.alt || b.legenda || '')}"
               loading="lazy" data-lupa="imagem">${leg}</figure>`
+    }
     case 'galeria': {
       const itens = (b.itens || []).filter(i => i.url)
       if (!itens.length) return ''

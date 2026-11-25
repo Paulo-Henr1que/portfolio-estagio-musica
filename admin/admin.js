@@ -577,7 +577,18 @@ function escolhaTamanho (b) {
     onclick: () => { if (v === 'total') delete b.tamanho; else b.tamanho = v; mudou(); pintar() },
   }, h('span', { class: 'tam-ic tam-ic-' + v }), rot)))
   pintar()
-  return h('div', { class: 'cx' }, 'Tamanho na página', grupo)
+  const posGrupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': 'Posição da foto' })
+  const posCx = h('div', { class: 'cx' }, 'Posição', posGrupo)
+  const posAtual = () => b.posicao || (b.tamanho === 'pequena' ? 'esquerda' : 'centro')
+  const pintarPos = () => {
+    posCx.hidden = !(b.tamanho === 'pequena' || b.tamanho === 'media')
+    posGrupo.replaceChildren(...[['esquerda', 'Ao lado do texto (esquerda)'], ['centro', 'Centralizada'], ['direita', 'Ao lado do texto (direita)']]
+      .map(([v, rot]) => h('button', { type: 'button', 'aria-pressed': String(posAtual() === v),
+        onclick: () => { b.posicao = v; mudou(); pintarPos() } }, rot)))
+  }
+  pintarPos()
+  grupo.addEventListener('click', () => setTimeout(pintarPos))
+  return h('div', {}, h('div', { class: 'cx' }, 'Tamanho na página', grupo), posCx)
 }
 
 function editorVideo (b) {
