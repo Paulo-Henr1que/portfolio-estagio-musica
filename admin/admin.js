@@ -14,16 +14,20 @@ const secao = (id) => window.SECOES.find(s => s.id === id)
 function atualizarEstrutura () {
   window.montarSecoes(estado.conteudo)
   montarLista()
-  document.querySelectorAll('#lista-secoes a').forEach(a =>
-    a.dataset.id === atual ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'))
-  $('#sel-secao').value = atual
 }
 
 // ── Estado ─────────────────────────────────────────────────────────
+// Cada estágio (1, 2 e 3) é um portfólio próprio: ?estagio=2 no endereço.
+const ESTAGIO = (() => { const n = Number(new URLSearchParams(location.search).get('estagio')); return [2, 3].includes(n) ? n : 1 })()
+const doEstagio = (hash) => location.pathname + (ESTAGIO > 1 ? '?estagio=' + ESTAGIO : '') + (hash || '')
+let ESTAGIOS = []          // estágios já publicados (vem da API)
 let estado = null          // { conteudo, planos } em edição
 let publicado = ''         // cópia (JSON) do que está no ar
 let atual = 'inicio'       // página aberta no editor
-const RASCUNHO = 'portfolio-rascunho'
+const RASCUNHO = 'portfolio-rascunho' + (ESTAGIO > 1 ? '-' + ESTAGIO : '')
+// configurações do site (aparência, menu, textos) ficam em conteudo._site
+const site = () => (estado.conteudo._site = estado.conteudo._site || {})
+const sob = (o, k) => (o[k] = o[k] && typeof o[k] === 'object' ? o[k] : {})
 
 // endereço de arquivo visto de dentro de /admin/
 const ver = (u) => !u || /^(https?:|\/|data:|blob:)/.test(u) ? u : '../' + u
@@ -53,6 +57,11 @@ const ICONES = {
   lixo: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
   mais: '<path d="M12 5v14M5 12h14"/>',
   subir: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>',
+  estagios: '<path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2"/>',
+  paleta: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.9 1.2-1.8-.5-1.1.2-2.2 1.4-2.2H17a4 4 0 0 0 4-4c0-5-4-10-9-10Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/>',
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  texto: '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>',
+  pagina: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
   link: '<path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/>',
 }
 const ic = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`
@@ -130,7 +139,7 @@ const limparNome = (n) => n.normalize('NFD').replace(/[̀-ͯ]/g, '')
 
 async function enviarArquivo (arq, aoProgredir = () => {}) {
   const final = arq.type.startsWith('image/') ? await reduzirImagem(arq) : arq
-  const nome = `portfolio/${atual}/${limparNome(final.name)}`
+  const nome = `portfolio/${ESTAGIO > 1 ? 'estagio-' + ESTAGIO + '/' : ''}${atual.replace(/^_/, '')}/${limparNome(final.name)}`
   // No computador, sem Vercel Blob: o servidor local guarda em midia/_local
   if (LOCAL && !new URLSearchParams(location.search).has('blob')) {
     const r = await fetch('/api/_upload-local?nome=' + encodeURIComponent(limparNome(final.name)), { method: 'POST', body: final })
@@ -204,44 +213,90 @@ async function enviarVarios (arqs, aoEnviar, { bt, barra, txt }) {
 }
 
 // ── Navegação entre páginas ────────────────────────────────────────
+// Páginas de configuração (não são páginas do site).
+const CONFIG = [
+  ['_estagios', 'Estágios', 'estagios', 'Os portfólios de cada estágio: nome, se aparece no site e qual você está editando.'],
+  ['_aparencia', 'Aparência', 'paleta', 'Cores, fontes e logo do site. A mudança aparece aqui no painel na hora.'],
+  ['_menu', 'Menu e páginas', 'menu', 'Nomes, ordem e quais seções aparecem no menu do topo, e quantas páginas cada lista tem.'],
+  ['_textos', 'Textos do site', 'texto', 'Títulos, avisos e botões que não fazem parte de uma página. Vazio volta ao texto original.'],
+]
+const ehConfig = (id) => CONFIG.some(c => c[0] === id)
+
 function montarLista () {
   const ul = $('#lista-secoes'); ul.innerHTML = ''
   const sel = $('#sel-secao'); sel.innerHTML = ''
+  ul.append(h('li', { class: 'titulo-grupo' }, 'Configurações'))
+  const og1 = h('optgroup', { label: 'Configurações' })
+  for (const [id, nome, icone] of CONFIG) {
+    ul.append(h('li', { class: 'cfg' }, h('a', { href: '#' + id, 'data-id': id, html: ic(icone) + '<span>' + nome + '</span>' })))
+    og1.append(h('option', { value: id }, nome))
+  }
+  ul.append(h('li', { class: 'titulo-grupo' }, 'Páginas'))
+  const og2 = h('optgroup', { label: 'Páginas' })
   for (const s of window.SECOES) {
     if (s.pai) continue
     const nome = s.menuTitulo || s.titulo
-    ul.append(h('li', { class: s.filhos ? 'grupo' : '' }, h('a', { href: '#' + s.id, 'data-id': s.id }, nome)))
-    sel.append(h('option', { value: s.id }, nome))
-    for (const f of (s.filhos || [])) {
-      ul.append(h('li', { class: 'filho' }, h('a', { href: '#' + f.id, 'data-id': f.id }, rotuloFilho(f))))
-      sel.append(h('option', { value: f.id }, '   ' + rotuloFilho(f)))
+    const temFilhos = (s.filhos || []).length
+    const li = h('li', { class: (temFilhos ? 'grupo' : '') + (s.oculto ? ' oculto' : '') },
+      h('a', { href: '#' + s.id, 'data-id': s.id, title: s.oculto ? 'Fora do menu do site' : null }, nome))
+    ul.append(li)
+    og2.append(h('option', { value: s.id }, nome))
+    if (temFilhos) {
+      const sub = h('ul', { class: 'filhos' })
+      for (const f of s.filhos) {
+        sub.append(h('li', { class: 'filho' }, h('a', { href: '#' + f.id, 'data-id': f.id }, rotuloFilho(f))))
+        og2.append(h('option', { value: f.id }, '   ' + rotuloFilho(f)))
+      }
+      ul.append(h('li', { class: 'filhos-cx' }, sub))
     }
   }
+  sel.append(og1, og2)
   sel.onchange = () => { location.hash = sel.value }
+  marcarLista()
+}
+// marca a página aberta e abre o grupo dela na lista lateral
+function marcarLista () {
+  document.querySelectorAll('#lista-secoes a').forEach(a =>
+    a.dataset.id === atual ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'))
+  const s = secao(atual)
+  const raiz = s ? (s.pai || s.id) : null
+  document.querySelectorAll('#lista-secoes li.grupo').forEach(li => {
+    const cx = li.nextElementSibling
+    const aberto = li.firstChild.dataset.id === raiz
+    li.classList.toggle('aberto', aberto)
+    if (cx && cx.classList.contains('filhos-cx')) cx.classList.toggle('aberto', aberto)
+  })
+  const sel = $('#sel-secao'); if (sel) sel.value = atual
 }
 const rotuloFilho = (f) => f.titulo
 
 function abrir (id) {
-  if (!secao(id)) id = 'inicio'
+  if (!secao(id) && !ehConfig(id)) id = 'inicio'
   atual = id
-  document.querySelectorAll('#lista-secoes a').forEach(a =>
-    a.dataset.id === id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'))
-  $('#sel-secao').value = id
-  desenharEditor()
+  marcarLista()
+  desenharEditor(true)
 }
 
 // ── Editor de uma página ───────────────────────────────────────────
-function desenharEditor () {
-  const s = secao(atual)
+function desenharEditor (animar) {
   const ed = $('#editor')
-  const pai = s.pai ? secao(s.pai) : null
   const partes = []
+  const cfg = CONFIG.find(c => c[0] === atual)
+  if (cfg) {
+    partes.push(h('div', { class: 'ed-cab' },
+      h('div', {}, h('p', { class: 'trilho' }, 'Configurações'), h('h1', {}, cfg[1]), h('p', { class: 'ed-desc' }, cfg[3]))))
+    partes.push(...{ _estagios: editorEstagios, _aparencia: editorAparencia, _menu: editorMenu, _textos: editorTextos }[atual]())
+    return mostrarEditor(ed, partes, animar)
+  }
+  const s = secao(atual)
+  const pai = s.pai ? secao(s.pai) : null
+  const urlSite = ESTAGIO > 1 ? '../?estagio=' + ESTAGIO : '../'
 
   partes.push(h('div', { class: 'ed-cab' },
     h('div', {},
-      pai ? h('p', { class: 'trilho' }, pai.titulo) : null,
+      pai ? h('p', { class: 'trilho' }, h('a', { href: '#' + pai.id }, pai.titulo)) : h('p', { class: 'trilho' }, 'Página'),
       h('h1', {}, s.titulo)),
-    h('a', { href: '../#/' + s.id, target: '_blank', rel: 'noopener' }, 'Ver esta página no site ↗')))
+    h('a', { class: 'ver-site', href: urlSite + '#/' + s.id, target: '_blank', rel: 'noopener' }, 'Ver no site ↗')))
 
   if (s.id === 'inicio') partes.push(...editorInicio(s))
   else if (s.referencias) partes.push(editorBibliografia())
@@ -270,7 +325,15 @@ function desenharEditor () {
     }))
   }
 
+  mostrarEditor(ed, partes, animar)
+}
+
+// Troca o conteúdo do editor; ao mudar de página, as partes entram em sequência.
+function mostrarEditor (ed, partes, animar) {
   ed.replaceChildren(...partes)
+  if (!animar) return
+  ed.classList.remove('entra'); void ed.offsetWidth; ed.classList.add('entra')
+  window.scrollTo({ top: 0, behavior: 'instant' })
 }
 
 // ── Subpáginas ─────────────────────────────────────────────────────
@@ -456,7 +519,7 @@ function editorBlocos (d, { titulo, dica }) {
       }))))
     if (foco != null) {
       const alvo = caixa.querySelector(`.bloco[data-i="${foco}"]`)
-      if (alvo) { alvo.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => alvo.querySelector('input, textarea, button.bt')?.focus({ preventScroll: true }), 300) }
+      if (alvo) { alvo.classList.add('novo'); alvo.scrollIntoView({ block: 'center', behavior: 'smooth' }); setTimeout(() => alvo.querySelector('input, textarea, button.bt')?.focus({ preventScroll: true }), 300) }
     }
   }
   desenhar()
@@ -690,6 +753,236 @@ function arquivoPdf (obj, chave) {
     botaoEnviar(obj[chave] ? 'Trocar PDF' : 'Enviar PDF', 'application/pdf', (url) => { obj[chave] = url; mudou(); pintar() })))
 }
 
+// ── Configurações: estágios ────────────────────────────────────────
+function editorEstagios () {
+  const s = site()
+  const url = (n, hash = '#inicio') => location.pathname + (n > 1 ? '?estagio=' + n : '') + hash
+  const cartoes = h('div', { class: 'estagios-grade' }, [1, 2, 3].map(n => {
+    const pub = ESTAGIOS.find(e => e.n === n)
+    const aqui = n === ESTAGIO
+    const nome = aqui ? ((s.nomeEstagio || '').trim() || 'Estágio ' + n) : (pub ? pub.nome : 'Estágio ' + n)
+    const status = aqui && !pub ? 'Em edição, ainda não publicado'
+      : !pub ? 'Ainda não criado'
+      : pub.ativo ? 'Publicado e visível no site' : 'Publicado, escondido do site'
+    return h('div', { class: 'estagio-cartao' + (aqui ? ' atual' : '') + (pub ? '' : ' novo') },
+      h('span', { class: 'estagio-n' }, String(n)),
+      h('div', { class: 'estagio-txt' }, h('b', {}, nome), h('small', {}, status)),
+      aqui
+        ? h('span', { class: 'estagio-selo' }, 'Editando agora')
+        : h('a', { class: 'bt leve pequeno', href: url(n) }, pub ? 'Editar este →' : 'Criar e editar →'))
+  }))
+  const lista = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Seus estágios'),
+    h('p', { class: 'dica' }, 'Cada estágio é um portfólio completo, com páginas, textos, cores e menu próprios. Um estágio novo só aparece no site depois de publicado.'),
+    cartoes)
+
+  const nome = campo('Nome do estágio', s, 'nomeEstagio', { ph: 'Estágio ' + ESTAGIO, dica: 'Aparece no seletor do topo do site, por exemplo “Estágio 1” ou “Estágio Supervisionado 2”.' })
+  nome.querySelector('input').addEventListener('input', nomeEstagioTopo)
+  const ativo = h('input', { type: 'checkbox', onchange: (e) => { if (e.target.checked) delete s.ativo; else s.ativo = false; mudou() } })
+  ativo.checked = s.ativo !== false
+  const seletor = campo('Rótulo do seletor no site', sob(s, 'textos'), 'estagioSeletor', { ph: window.texto('estagioSeletor', {}) })
+  const este = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Este estágio'),
+    h('p', { class: 'dica' }, 'O seletor de estágios só aparece no topo do site quando houver mais de um estágio visível.'),
+    h('div', { class: 'grade-campos' }, nome, seletor),
+    ESTAGIO > 1 ? h('label', { class: 'marcar', style: 'margin-top:14px' }, ativo, 'Mostrar este estágio no site') : null)
+
+  const partes = [lista, este]
+  // estágio novo: aproveitar aparência, menu e textos do estágio 1
+  if (ESTAGIO > 1) {
+    const bt = h('button', { type: 'button', class: 'bt leve', onclick: async () => {
+      bt.disabled = true; bt.textContent = 'Copiando…'
+      try {
+        const d = await api('conteudo?estagio=1', { cache: 'no-store' })
+        const base = (d && d.conteudo && d.conteudo._site) || {}
+        const { nomeEstagio, ativo: _a, ...resto } = copia(base)
+        estado.conteudo._site = { ...resto, ...(s.nomeEstagio ? { nomeEstagio: s.nomeEstagio } : {}), ...(s.ativo === false ? { ativo: false } : {}) }
+        mudou(); window.aplicarTema(estado.conteudo); atualizarEstrutura(); desenharEditor()
+        avisar('Aparência, menu e textos copiados do Estágio 1.')
+      } catch (e) { avisar('Não foi possível copiar: ' + e.message, true); bt.disabled = false; bt.textContent = 'Copiar do Estágio 1' }
+    } }, 'Copiar do Estágio 1')
+    partes.push(h('section', { class: 'ed-parte' },
+      h('h2', {}, 'Começar parecido com o Estágio 1'),
+      h('p', { class: 'dica' }, 'Copia as cores, as fontes, a logo, o menu e os textos do site. As páginas continuam vazias para você escrever.'),
+      bt))
+  }
+  return partes
+}
+
+// ── Configurações: aparência ───────────────────────────────────────
+function editorAparencia () {
+  const s = site()
+  const tema = sob(s, 'tema')
+  const aplicar = () => { mudou(); window.aplicarTema(estado.conteudo) }
+  // carrega todas as fontes da lista para as amostras
+  window.carregarFontes([...new Set([...window.FONTES_TITULO, ...window.FONTES_TEXTO])], 'fontes-amostra')
+
+  // paleta
+  const grade = h('div', { class: 'paletas' })
+  const proprias = h('div', { class: 'cores-proprias' })
+  const pintar = () => {
+    const atualP = tema.paleta || 'verde'
+    const opcoes = [...Object.entries(window.PALETAS), ['propria', { nome: 'Personalizada', ...window.coresDoTema(estado.conteudo) }]]
+    grade.replaceChildren(...opcoes.map(([k, p]) => h('button', {
+      type: 'button', class: 'paleta', 'aria-pressed': String(atualP === k),
+      onclick: () => {
+        if (k === 'propria' && !tema.cores) tema.cores = Object.fromEntries(window.CORES_EDITAVEIS.map(([c]) => [c, window.coresDoTema(estado.conteudo)[c]]))
+        if (k === 'verde') delete tema.paleta; else tema.paleta = k
+        aplicar(); pintar()
+      } },
+      h('span', { class: 'paleta-cores' }, ['pastel', 'medio', 'medio-f', 'escuro'].map(c => h('i', { style: 'background:' + p[c] }))),
+      h('span', { class: 'paleta-nome' }, k === 'propria' ? 'Personalizada' : p.nome))))
+    proprias.hidden = atualP !== 'propria'
+    if (atualP === 'propria') {
+      const cores = sob(tema, 'cores')
+      proprias.replaceChildren(...window.CORES_EDITAVEIS.map(([c, rot]) => {
+        const inp = h('input', { type: 'color', 'aria-label': rot })
+        inp.value = cores[c] || window.PALETAS.verde[c]
+        const cod = h('code', {}, inp.value.toUpperCase())
+        inp.addEventListener('input', () => { cores[c] = inp.value; cod.textContent = inp.value.toUpperCase(); aplicar() })
+        return h('label', { class: 'cor' }, inp, h('span', {}, rot, cod))
+      }))
+    }
+  }
+  pintar()
+  const secCores = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Paleta de cores'),
+    h('p', { class: 'dica' }, 'Escolha uma paleta pronta ou monte a sua em “Personalizada”. O painel já mostra as cores novas.'),
+    grade, proprias)
+
+  // fontes
+  const escolhaFonte = (rotulo, chave, lista, padrao, amostra, classe) => {
+    const sel = h('select', { 'aria-label': rotulo })
+    for (const f of lista) sel.append(h('option', { value: f }, f + (f === padrao ? ' (original)' : '')))
+    sel.value = tema[chave] || padrao
+    const ex = h('p', { class: 'fonte-amostra ' + classe, style: `font-family:"${sel.value}"` }, amostra)
+    sel.addEventListener('change', () => {
+      if (sel.value === padrao) delete tema[chave]; else tema[chave] = sel.value
+      ex.style.fontFamily = `"${sel.value}"`; aplicar()
+    })
+    return h('div', { class: 'cx' }, rotulo, sel, ex)
+  }
+  const secFontes = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Fontes'),
+    h('p', { class: 'dica' }, 'Uma fonte para os títulos e os textos longos, outra para o menu, os rótulos e os botões.'),
+    h('div', { class: 'grade-campos duas-col' },
+      escolhaFonte('Títulos e textos', 'fonteTitulo', window.FONTES_TITULO, 'EB Garamond', 'Relatos de observação e reflexões sobre a prática docente.', 'grande'),
+      escolhaFonte('Menu, rótulos e botões', 'fonteTexto', window.FONTES_TEXTO, 'Karla', 'Início · A Escola · Planos de Aula · Baixar', '')))
+
+  // logo e nome
+  const vista = h('div', { class: 'logo-vista' })
+  const pintarLogo = () => {
+    vista.replaceChildren(s.logo
+      ? h('img', { src: ver(s.logo), alt: 'Logo atual' })
+      : h('svg', { viewBox: '0 0 128 96', html: '<use href="#tamandua"/>', style: 'color:var(--medio-f)' }))
+    tirar.hidden = !s.logo
+  }
+  const tirar = h('button', { type: 'button', class: 'bt leve pequeno', onclick: () => { delete s.logo; mudou(); pintarLogo() } }, 'Voltar ao tamanduá')
+  const textos = sob(s, 'textos')
+  const secLogo = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Logo e nome do site'),
+    h('p', { class: 'dica' }, 'A logo aparece no topo e no fim da pauta da capa. Imagem PNG com fundo transparente fica melhor.'),
+    h('div', { class: 'midia-linha' }, vista, h('div', { class: 'midia-campos' },
+      h('div', { class: 'enviar' }, botaoEnviar('Enviar logo', 'image/png,image/svg+xml,image/webp,image/jpeg', (url) => { s.logo = url; mudou(); pintarLogo() }), tirar),
+      campo('Nome ao lado da logo', textos, 'marcaTitulo', { ph: window.texto('marcaTitulo', {}) }),
+      campo('Linha pequena abaixo do nome', textos, 'marcaSub', { ph: window.texto('marcaSub', {}) }))))
+  pintarLogo()
+
+  return [secCores, secFontes, secLogo]
+}
+
+// ── Configurações: menu e quantidades ──────────────────────────────
+function editorMenu () {
+  const s = site()
+  const menu = sob(s, 'menu')
+  const caixa = h('div')
+  const desenhar = () => {
+    const raiz = window.SECOES.filter(x => !x.pai)
+    caixa.replaceChildren(h('div', { class: 'menu-itens' }, raiz.map((x, i) => {
+      const m = sob(menu, x.id)
+      const nomeMenu = campo('Nome no menu', m, 'menu', { ph: x.menuPadrao })
+      const titulo = campo('Título da página', m, 'titulo', { ph: x.tituloPadrao })
+      for (const c of [nomeMenu, titulo]) c.querySelector('input').addEventListener('change', () => { limpar(x.id); atualizarEstrutura() })
+      const ver = h('input', { type: 'checkbox', disabled: x.id === 'inicio', onchange: (e) => {
+        if (e.target.checked) delete m.oculto; else m.oculto = true
+        limpar(x.id); mudou(); atualizarEstrutura(); desenhar()
+      } })
+      ver.checked = !m.oculto
+      const mexer = (d) => {
+        const ids = raiz.map(r => r.id)
+        const j = i + d
+        if (j < 1 || j >= ids.length) return
+        ;[ids[i], ids[j]] = [ids[j], ids[i]]
+        s.ordem = ids.filter(id => id !== 'inicio')
+        mudou(); atualizarEstrutura(); desenhar()
+      }
+      return h('div', { class: 'menu-item' + (m.oculto ? ' fora' : '') },
+        h('span', { class: 'sub-n' }, String(i + 1).padStart(2, '0')),
+        h('div', { class: 'menu-campos' }, nomeMenu, titulo,
+          h('label', { class: 'marcar' }, ver, x.id === 'inicio' ? 'Sempre no menu' : 'Aparece no menu')),
+        h('div', { class: 'acoes-item' },
+          icBt('cima', 'Subir', () => mexer(-1), { disabled: i <= 1 }),
+          icBt('baixo', 'Descer', () => mexer(1), { disabled: i === 0 || i === raiz.length - 1 })))
+    })))
+  }
+  // não guarda objetos vazios
+  const limpar = (id) => {
+    const m = menu[id]
+    if (m) for (const k of Object.keys(m)) if (m[k] === '' || m[k] == null) delete m[k]
+  }
+  desenhar()
+  const secMenu = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Itens do menu'),
+    h('p', { class: 'dica' }, 'Campo vazio usa o nome original (o que aparece em cinza). O Início fica sempre em primeiro.'),
+    caixa)
+
+  const qtd = sob(s, 'quantidades')
+  const numero = (k) => {
+    const sec = secao(k) || { titulo: k }
+    const inp = h('input', { type: 'number', min: 1, max: 30, inputmode: 'numeric' })
+    inp.value = qtd[k] || window.QTD_PADRAO[k]
+    inp.addEventListener('change', () => {
+      const n = Math.max(1, Math.min(30, Math.round(Number(inp.value) || window.QTD_PADRAO[k])))
+      inp.value = n
+      if (n === window.QTD_PADRAO[k]) delete qtd[k]; else qtd[k] = n
+      mudou(); atualizarEstrutura()
+    })
+    return h('label', { class: 'cx' }, sec.menuTitulo || sec.titulo, inp)
+  }
+  const secQtd = h('section', { class: 'ed-parte' },
+    h('h2', {}, 'Quantidade de páginas'),
+    h('p', { class: 'dica' }, 'Quantas páginas numeradas cada lista tem. Diminuir só esconde as últimas: o que foi escrito nelas não é apagado.'),
+    h('div', { class: 'grade-campos' }, numero('observacoes'), numero('planos'), numero('relatos')))
+  return [secMenu, secQtd]
+}
+
+// ── Configurações: textos fixos e nomes de campos ──────────────────
+function editorTextos () {
+  const s = site()
+  const textos = sob(s, 'textos')
+  const partes = window.TEXTOS_PADRAO.filter(([g]) => g !== 'Topo do site').map(([grupo, lista]) =>
+    h('section', { class: 'ed-parte' },
+      h('h2', {}, grupo),
+      h('div', { class: 'grade-campos' }, lista.map(([k, rot, padrao]) => {
+        const c = campo(rot, textos, k, padrao.length > 70 ? { area: true, linhas: 2, ph: padrao, classe: 'largo texto-curto' } : { ph: padrao })
+        c.querySelector('input, textarea').addEventListener('change', () => { if (!textos[k]) delete textos[k]; atualizarEstrutura() })
+        return c
+      }))))
+  const rotulos = sob(s, 'rotulos')
+  for (const [titulo, grupo, campos] of window.CAMPOS_ROTULOS) {
+    const g = sob(rotulos, grupo)
+    partes.push(h('section', { class: 'ed-parte' },
+      h('h2', {}, titulo),
+      h('p', { class: 'dica' }, 'O nome de cada campo, como aparece no site e no painel.'),
+      h('div', { class: 'grade-campos' }, campos.map(([k, rot]) => {
+        const c = campo(rot, g, k, { ph: rot })
+        c.querySelector('input').addEventListener('change', () => { if (!g[k]) delete g[k]; atualizarEstrutura() })
+        return c
+      }))))
+  }
+  return partes
+}
+
 // ── Mudanças, rascunho e publicação ────────────────────────────────
 function mudou () {
   const s = sujo()
@@ -703,6 +996,11 @@ function mudou () {
 // Deixa toda página com a mesma forma (listas existentes, sem os modelos
 // vazios do arquivo original), para "sem alterações" ser comparável.
 function normalizar (base) {
+  // esqueleto das configurações: abrir uma tela não conta como alteração
+  const st = (base.conteudo._site = base.conteudo._site || {})
+  for (const k of ['tema', 'textos', 'menu', 'quantidades', 'rotulos']) st[k] = st[k] || {}
+  st.rotulos.ident = st.rotulos.ident || {}; st.rotulos.escola = st.rotulos.escola || {}
+  for (const sec of window.SECOES) if (!sec.pai) st.menu[sec.id] = st.menu[sec.id] || {}
   for (const s of window.SECOES) {
     const d = (base.conteudo[s.id] = base.conteudo[s.id] || {})
     if (s.blocos) {
@@ -720,9 +1018,12 @@ function normalizar (base) {
 async function carregar () {
   $('#editor').replaceChildren(h('p', { class: 'carregando' }, 'Carregando o conteúdo…'))
   let d = {}
-  try { d = await api('conteudo', { cache: 'no-store' }) } catch {}
+  try { d = await api('conteudo?estagio=' + ESTAGIO, { cache: 'no-store' }) } catch {}
+  ESTAGIOS = (d && d.estagios) || []
+  // estágios 2 e 3 começam vazios (os textos de reserva são do estágio 1)
   const base = d && !d.vazio && d.conteudo
     ? { conteudo: d.conteudo, planos: d.planos || {} }
+    : ESTAGIO > 1 ? { conteudo: {}, planos: {} }
     : { conteudo: copia(window.CONTEUDO || {}), planos: copia(window.PLANOS || {}) }
   window.montarSecoes(base.conteudo)
   normalizar(base)
@@ -736,9 +1037,16 @@ async function carregar () {
       else localStorage.removeItem(RASCUNHO)
     }
   } catch {}
+  window.aplicarTema(estado.conteudo)
+  nomeEstagioTopo()
   montarLista()
   abrir(location.hash.slice(1) || 'inicio')
   mudou()
+}
+
+function nomeEstagioTopo () {
+  const n = ((estado.conteudo._site || {}).nomeEstagio || '').trim() || 'Estágio ' + ESTAGIO
+  $('#p-estagio').textContent = n
 }
 
 // O site só mostra o que tem conteúdo; os modelos vazios saem antes de salvar.
@@ -763,9 +1071,9 @@ function abrirPrevia (paraPublicar) {
   $('#previa-publicar').hidden = !sujo()
   tela.hidden = false
   document.body.style.overflow = 'hidden'
-  const enviar = () => q.contentWindow.postMessage({ tipo: 'previa', ...limparParaSalvar(estado), rota: atual }, location.origin)
+  const enviar = () => q.contentWindow.postMessage({ tipo: 'previa', ...limparParaSalvar(estado), rota: ehConfig(atual) ? 'inicio' : atual }, location.origin)
   if (!previaPronta || !q.src) {
-    q.src = '../index.html?previa=1#/' + atual
+    q.src = '../index.html?previa=1#/' + (ehConfig(atual) ? 'inicio' : atual)
     window.addEventListener('message', function pronto (e) {
       if (e.origin === location.origin && e.data && e.data.tipo === 'previa-pronta') { previaPronta = true; enviar() }
     })
@@ -783,7 +1091,9 @@ async function publicar () {
   bt.disabled = true; bt.textContent = 'Publicando…'
   try {
     const limpo = limparParaSalvar(estado)
-    await api('conteudo', { method: 'PUT', body: limpo })
+    await api('conteudo?estagio=' + ESTAGIO, { method: 'PUT', body: limpo })
+    const nome = ((estado.conteudo._site || {}).nomeEstagio || '').trim() || 'Estágio ' + ESTAGIO
+    ESTAGIOS = [...ESTAGIOS.filter(e => e.n !== ESTAGIO), { n: ESTAGIO, nome, ativo: ESTAGIO === 1 || (estado.conteudo._site || {}).ativo !== false }]
     publicado = JSON.stringify(estado)
     mudou()
     fecharPrevia()
@@ -912,7 +1222,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('#pre
 $('#bt-descartar').addEventListener('click', async () => {
   if (!(await confirmar('Descartar as alterações?', 'Tudo volta a ser como está publicado no site.', 'Descartar'))) return
   estado = JSON.parse(publicado); mudou(); atualizarEstrutura()
-  if (!secao(atual)) location.hash = 'inicio'; else desenharEditor()
+  window.aplicarTema(estado.conteudo); nomeEstagioTopo()
+  if (!secao(atual) && !ehConfig(atual)) location.hash = 'inicio'; else desenharEditor()
 })
 window.addEventListener('hashchange', () => estado && abrir(location.hash.slice(1)))
 window.addEventListener('beforeunload', (e) => { if (sujo()) { e.preventDefault(); e.returnValue = '' } })

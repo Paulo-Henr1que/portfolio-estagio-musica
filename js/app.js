@@ -23,13 +23,49 @@ const paragrafos = (t) => String(t || '').split(/\n{2,}/)
   .filter(p => p.trim())
   .map(p => '<p>' + linkar(esc(p.trim())).replace(/\n/g, '<br>') + '</p>').join('')
 
+const T = (k) => window.texto(k)
 const vazio = (v) => v === undefined || v === null || String(v).trim() === ''
 
 // ── Menu ───────────────────────────────────────────────────────────
+function desenharMenu () {
+  document.getElementById('menu').innerHTML = window.SECOES.filter(s => s.menu)
+    .map(s => `<li><a href="#/${s.id}">${esc(s.menuTitulo || s.titulo)}</a></li>`).join('')
+  desenharMarca()
+}
+
+// Nome, linha de baixo e logo do topo (editáveis no painel).
+function desenharMarca () {
+  const m = document.querySelector('.topo .marca')
+  if (!m) return
+  const logo = ((window.CONTEUDO || {})._site || {}).logo
+  m.innerHTML = (logo
+    ? `<img class="logo-img" src="${esc(logo)}" alt="">`
+    : '<svg viewBox="0 0 128 96" style="color:var(--medio-f)" aria-hidden="true"><use href="#tamandua"/></svg>')
+    + `<span><b>${esc(T('marcaTitulo'))}</b><span>${esc(T('marcaSub'))}</span></span>`
+  m.setAttribute('href', '#/inicio')
+}
+
+// Seletor de estágios no topo: aparece quando há mais de um publicado.
+const ESTAGIO = (() => { const n = Number(new URLSearchParams(location.search).get('estagio')); return [2, 3].includes(n) ? n : 1 })()
+function desenharEstagios (lista) {
+  const ativos = (lista || []).filter(e => e.ativo)
+  let cx = document.getElementById('estagios')
+  if (ativos.length < 2) { if (cx) cx.remove(); return }
+  if (!cx) {
+    cx = document.createElement('div'); cx.id = 'estagios'; cx.className = 'estagios'
+    document.querySelector('.topo-in .marca').after(cx)
+  }
+  cx.setAttribute('role', 'navigation')
+  cx.setAttribute('aria-label', T('estagioSeletor'))
+  cx.innerHTML = ativos.map(e => {
+    const href = location.pathname + (e.n > 1 ? '?estagio=' + e.n : '') + '#/inicio'
+    return `<a href="${href}" title="${esc(e.nome)}"${e.n === ESTAGIO ? ' aria-current="true"' : ''}>${esc(e.nome)}</a>`
+  }).join('')
+}
+
 function montarMenu () {
   const ul = document.getElementById('menu')
-  ul.innerHTML = window.SECOES.filter(s => s.menu)
-    .map(s => `<li><a href="#/${s.id}">${esc(s.menuTitulo || s.titulo)}</a></li>`).join('')
+  desenharMenu()
 
   const bt = document.getElementById('bt-menu')
   bt.addEventListener('click', () => {
@@ -127,7 +163,7 @@ function renderBlocoBase (b) {
       return `<figure class="video"><video src="${esc(b.url)}" controls preload="metadata" playsinline
               ${b.poster ? `poster="${esc(b.poster)}"` : ''}></video>
         <div class="video-barra">
-          ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>` : ''}
+          ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">${esc(T('abrirDrive'))}</a>` : ''}
         </div>${leg}</figure>`
     case 'pdf':
       // Documento em PDF desenhado na página, no mesmo formato dos planos.
@@ -139,16 +175,16 @@ function renderBlocoBase (b) {
         <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#doc"/></svg></div>
       <div class="txt"><b>${esc(b.nome || b.legenda || 'Documento')}</b>
         ${b.nome && b.legenda ? `<span>${esc(b.legenda)}</span>` : ''}</div>
-      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener">Abrir</a>
-      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener" download>Baixar</a>
+      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener">${esc(T('abrir'))}</a>
+      <a class="bt leve" href="${esc(b.url)}" target="_blank" rel="noopener" download>${esc(T('baixar'))}</a>
     </div></div>`
       return `<figure class="pdf-bloco">
         <div class="pl-doc" data-pdf="${esc(b.url)}">
           <div class="pl-folhas"><p class="pl-carregando">Carregando o documento…</p></div>
         </div>
         <p class="pl-links">
-          <a href="${esc(b.url)}" target="_blank" rel="noopener">Abrir o PDF ↗</a>
-          ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>` : ''}
+          <a href="${esc(b.url)}" target="_blank" rel="noopener">${esc(T('abrirPdf'))}</a>
+          ${b.drive ? `<a href="${esc(b.drive)}" target="_blank" rel="noopener">${esc(T('abrirDrive'))}</a>` : ''}
         </p>${leg}</figure>`
     default:
       return ''
@@ -171,7 +207,7 @@ function indice (itens) {
         <b>${esc(i.nome)}</b>
         ${i.meta ? `<em>${esc(i.meta)}</em>` : ''}
       </span>
-      <span class="res${i.pendente ? ' pendente' : ''}">${i.pendente ? 'a preencher' : esc(i.res || '')}</span>
+      <span class="res${i.pendente ? ' pendente' : ''}">${i.pendente ? esc(T('aPreencher')) : esc(i.res || '')}</span>
     </a></li>`).join('') + `</ol>`
 }
 
@@ -186,9 +222,7 @@ function renderCampos (defs, valores) {
 
 function renderDocumentos (lista) {
   const docs = (lista || []).filter(d => d.url && d.nome)
-  if (!docs.length) return `<div class="aviso"><b>Ainda sem documentos</b>
-    A ficha de frequência e a ficha de avaliação assinadas aparecerão aqui
-    assim que forem adicionadas ao portfólio.</div>`
+  if (!docs.length) return `<div class="aviso"><b>${esc(T('semDocsTit'))}</b>${esc(T('semDocs'))}</div>`
   return `<div class="docs">` + docs.map(d => `
     <div class="doc">
       <div class="ic" style="color:var(--medio-f)">
@@ -198,7 +232,7 @@ function renderDocumentos (lista) {
         ${d.descricao ? `<span>${esc(d.descricao)}</span>` : ''}
       </div>
       <a class="bt leve" href="${esc(d.url)}" target="_blank" rel="noopener"
-         download>Baixar</a>
+         download>${esc(T('baixar'))}</a>
     </div>`).join('') + `</div>`
 }
 
@@ -211,11 +245,13 @@ function pagInicio (s) {
   const d = dados('inicio')
   const campos = s.campos.map(([k, rot]) => `
     <div><dt>${esc(rot)}</dt><span class="pont"></span>
-    <dd class="${vazio(d[k]) ? 'vazio' : ''}">${vazio(d[k]) ? 'a preencher' : esc(d[k])}</dd></div>`).join('')
+    <dd class="${vazio(d[k]) ? 'vazio' : ''}">${vazio(d[k]) ? esc(T('aPreencher')) : esc(d[k])}</dd></div>`).join('')
 
   const atalhos = indice(window.SECOES
     .filter(x => x.menu && x.id !== 'inicio')
     .map((x, i) => ({ id: x.id, n: i + 1, nome: x.titulo, res: resumoSecao(x) })))
+  // a logo enviada no painel substitui o tamanduá também na pauta da capa
+  const logo = ((window.CONTEUDO || {})._site || {}).logo
 
   return `
   <section class="capa">
@@ -300,29 +336,27 @@ function pagInicio (s) {
             <rect x="6" y="40" width="1.8" height="64" opacity=".55"/>
             <rect x="13" y="40" width="5.4" height="64" opacity=".75"/>
           </g>
-          <g transform="translate(44 48.8) scale(0.62)" opacity=".92">
-            <use href="#tamandua" width="150" height="100"/>
-          </g>
+          ${logo
+            ? `<image href="${esc(logo)}" x="44" y="34" width="96" height="64" preserveAspectRatio="xMidYMax meet"/>`
+            : `<g transform="translate(44 48.8) scale(0.62)" opacity=".92"><use href="#tamandua" width="150" height="100"/></g>`}
         </svg>
 
       </div>
     </div>
 
     <div class="contem">
-      <span class="rotulo">Portfólio reflexivo de estágio supervisionado</span>
-      <h1>${vazio(d.titulo) ? 'Portfólio Reflexivo de Estágio Supervisionado em Licenciatura em Música'
-                            : esc(d.titulo)}</h1>
-      <p class="linha">Relatos de observação, planos de aula, relatos das aulas ministradas
-        e reflexões sobre a prática docente.</p>
+      <span class="rotulo">${esc(T('capaRotulo'))}</span>
+      <h1>${vazio(d.titulo) ? esc(T('capaTitulo')) : esc(d.titulo)}</h1>
+      <p class="linha">${esc(T('capaLinha'))}</p>
     </div>
   </section>
 
   <div class="contem">
     <div class="pagina">
-      <h3 class="sub fig fig-1">Identificação</h3>
+      <h3 class="sub fig fig-1">${esc(T('secIdent'))}</h3>
       <dl class="ident">${campos}</dl>
 
-      <h3 class="sub fig fig-2">Sobre este portfólio</h3>
+      <h3 class="sub fig fig-2">${esc(T('secSobre'))}</h3>
       <div class="cartao corpo">
         ${renderBlocos(d.blocos) || vazioAviso({
           titulo: 'Texto de apresentação',
@@ -330,27 +364,17 @@ function pagInicio (s) {
         })}
       </div>
 
-      <h3 class="sub fig fig-3">Documentos do estágio</h3>
+      <h3 class="sub fig fig-3">${esc(T('secDocs'))}</h3>
       ${renderDocumentos(d.documentos)}
 
-      <h3 class="sub fig fig-4">Seções do portfólio</h3>
+      <h3 class="sub fig fig-4">${esc(T('secSecoes'))}</h3>
       ${atalhos}
     </div>
   </div>`
 }
 
 function resumoSecao (s) {
-  const r = {
-    biografia: 'Trajetória, formação e relação com a música.',
-    escola: 'Caracterização e contexto da escola onde o estágio foi realizado.',
-    introducao: 'Contexto do estágio, as turmas e as leituras que acompanharam a prática.',
-    observacoes: 'Três relatos das semanas de observação.',
-    planos: 'Os sete planos de aula corrigidos.',
-    relatos: 'Os sete relatos das aulas ministradas.',
-    consideracoes: 'Reflexão sobre a experiência do estágio.',
-    bibliografia: 'Referências utilizadas ao longo do portfólio.',
-  }
-  return r[s.id] || ''
+  return T('res-' + s.id)
 }
 
 // a página já tem algum conteúdo escrito ou alguma mídia?
@@ -380,7 +404,7 @@ function pagIndice (s) {
         texto: 'O texto de abertura desta seção ainda será escrito.',
       })}
     </div>`}
-    <h3 class="sub">Acessar</h3>
+    <h3 class="sub">${esc(T('acessar'))}</h3>
     ${cartoes}
   </div></div>`
 }
@@ -397,10 +421,10 @@ function ponte (n, para) {
   const plano = para === 'plano'
   const alvo = (plano ? 'plano-' : 'relato-') + n
   const ad = dados(alvo)
-  const nome = plano ? 'Plano de Aula ' + n : 'Relato de Aula ' + n
+  const nome = (window.secao(alvo) || {}).titulo || (plano ? T('nomePlano') : T('nomeRelato')) + ' ' + n
   return `<a class="ponte ${plano ? 'volta' : ''}" href="#/${alvo}">
     <span class="ponte-ic">${plano ? seta('esq') : seta('dir')}</span>
-    <span class="ponte-txt"><small>${plano ? 'Ver o planejamento desta aula' : 'Ver como esta aula aconteceu'}</small>
+    <span class="ponte-txt"><small>${esc(plano ? T('pontePlano') : T('ponteRelato'))}</small>
       <b>${nome}</b>${!vazio(ad.titulo) && ad.titulo !== nome ? `<em>${esc(ad.titulo)}</em>` : ''}</span>
   </a>`
 }
@@ -418,7 +442,7 @@ function vizinhos (s) {
 function pagPlano (s, p) {
   return `<div class="contem"><div class="pagina plano">
     <header>
-      <p class="trilho"><a href="#/planos">Planos de Aula</a> <span>›</span> <span>${esc(s.titulo)}</span></p>
+      <p class="trilho"><a href="#/planos">${esc((window.secao('planos') || {}).titulo || '')}</a> <span>›</span> <span>${esc(s.titulo)}</span></p>
       <h2 class="titulo">${esc(s.titulo)}</h2>
       <p class="pl-sub">${esc(p.titulo)} · ${esc(p.data)}</p>
     </header>
@@ -426,7 +450,7 @@ function pagPlano (s, p) {
       <div class="pl-folhas"><p class="pl-carregando">Carregando o plano…</p></div>
     </div>
     <p class="pl-links">
-      <a href="${esc(p.drive)}" target="_blank" rel="noopener">Abrir no Google Drive ↗</a>
+      <a href="${esc(p.drive)}" target="_blank" rel="noopener">${esc(T('abrirDrive'))}</a>
     </p>
     ${ponte(s.ordem, 'relato')}
     ${vizinhos(s)}
@@ -511,7 +535,7 @@ function renderDobras (blocos) {
     atual.itens.push(b)
   }
   grupos.push(atual)
-  if (midias.length) grupos.push({ titulo: 'Fotos e vídeos', itens: midias })
+  if (midias.length) grupos.push({ titulo: T('fotosVideos'), itens: midias })
 
   let primeira = true
   return grupos.filter(g => g.itens.length).map(g => {
@@ -520,7 +544,7 @@ function renderDobras (blocos) {
       const txt = g.itens.filter(b => b.tipo === 'texto').map(b => b.texto).join('\n\n')
       const ps = txt.split(/\n{2,}/).filter(p => p.trim())
       if (ps.length <= 1) return renderBlocos(g.itens)
-      const html = paragrafos(ps[0]) + dobra('Continuar lendo', paragrafos(ps.slice(1).join('\n\n')), '', false)
+      const html = paragrafos(ps[0]) + dobra(T('continuar'), paragrafos(ps.slice(1).join('\n\n')), '', false)
       primeira = false
       return html
     }
@@ -598,7 +622,7 @@ function pagBibliografia (s) {
       }).join('') + `</ol>`
     : vazioAviso({
         titulo: 'Referências',
-        texto: 'As referências ainda serão cadastradas. Elas aparecem aqui ordenadas alfabeticamente de forma automática.',
+        texto: T('refsVazio'),
       })
 
   return `<div class="contem"><div class="pagina">
@@ -643,8 +667,7 @@ function trocar () {
   else el.innerHTML = pagSimples(s)
   desenharPdfs()
 
-  document.title = (s.id === 'inicio' ? '' : s.titulo + ' · ') +
-    'Portfólio de Estágio · Licenciatura em Música'
+  document.title = (s.id === 'inicio' ? '' : s.titulo + ' · ') + T('marcaTitulo') + ' · ' + T('marcaSub')
   window.scrollTo({ top: 0, behavior: 'instant' })
 }
 
@@ -691,10 +714,13 @@ function montarTopo () {
 // salvo, ou se a consulta falhar, o site usa js/conteudo.js e
 // js/planos.js, que continuam valendo como reserva.
 function aplicarConteudo (d) {
+  if (d && d.estagios) desenharEstagios(d.estagios)
   if (!d || d.vazio || !d.conteudo) return
   window.CONTEUDO = d.conteudo
   if (d.planos) window.PLANOS = d.planos
-  window.montarSecoes(window.CONTEUDO) // subpáginas criadas no painel
+  window.montarSecoes(window.CONTEUDO) // subpáginas e menu editados no painel
+  window.aplicarTema(window.CONTEUDO)
+  desenharMenu()
 }
 
 async function buscarPublicado () {
@@ -702,7 +728,7 @@ async function buscarPublicado () {
   try {
     const ctl = new AbortController()
     const t = setTimeout(() => ctl.abort(), 4000)
-    const r = await fetch('/api/conteudo', { signal: ctl.signal, cache: 'no-store' })
+    const r = await fetch('/api/conteudo?estagio=' + ESTAGIO, { signal: ctl.signal, cache: 'no-store' })
     clearTimeout(t)
     if (r.ok) aplicarConteudo(await r.json())
   } catch (e) { /* segue com o conteúdo dos arquivos */ }
@@ -713,6 +739,8 @@ async function buscarPublicado () {
 const PREVIA = new URLSearchParams(location.search).has('previa')
 
 ;(async function iniciar () {
+  // Estágios 2 e 3 não usam os textos de reserva (são do estágio 1).
+  if (ESTAGIO !== 1) { window.CONTEUDO = {}; window.PLANOS = {} }
   window.montarSecoes(window.CONTEUDO)
   montarTopo()
   montarMenu()
@@ -722,6 +750,7 @@ const PREVIA = new URLSearchParams(location.search).has('previa')
     window.addEventListener('message', (e) => {
       if (e.origin !== location.origin || !e.data || e.data.tipo !== 'previa') return
       aplicarConteudo(e.data)
+      if (e.data.conteudo && !e.data.planos) window.PLANOS = {}
       const alvo = '#/' + (e.data.rota || 'inicio')
       if (location.hash !== alvo) location.hash = alvo
       else { const y = window.scrollY; trocar(); window.scrollTo(0, y) }
