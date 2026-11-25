@@ -416,7 +416,7 @@ function mover (lista, i, d) {
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
 const TIPOS = [
-  ['texto', 'Parágrafo'], ['retratil', 'Texto retrátil'], ['subtitulo', 'Subtítulo'], ['citacao', 'Citação'],
+  ['texto', 'Parágrafo'], ['subtitulo', 'Subtítulo'], ['citacao', 'Citação'],
   ['imagem', 'Foto'], ['galeria', 'Galeria de fotos'], ['video', 'Vídeo'], ['pdf', 'Documento PDF'],
 ]
 const nomeTipo = (t) => (TIPOS.find(x => x[0] === t) || [t, t])[1]
@@ -466,7 +466,7 @@ function editorBlocos (d, { titulo, dica }) {
 function corpoBloco (b) {
   switch (b.tipo) {
     case 'texto':
-      return [comLink(campo('', b, 'texto', { area: true, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' }), b, 'texto')]
+      return [comLink(campo('', b, 'texto', { area: true, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' }), b, 'texto'), opcaoRetratil(b)]
     case 'retratil': {
       const aberta = h('input', { type: 'checkbox', onchange: (e) => { if (e.target.checked) b.aberta = true; else delete b.aberta; mudou() } })
       aberta.checked = !!b.aberta
@@ -479,7 +479,7 @@ function corpoBloco (b) {
     case 'subtitulo':
       return [campo('', b, 'texto', { ph: 'Ex.: Turma 5º A' })]
     case 'citacao':
-      return [campo('', b, 'texto', { area: true, linhas: 3, ph: 'Trecho citado de um autor.' })]
+      return [campo('', b, 'texto', { area: true, linhas: 3, ph: 'Trecho citado de um autor.' }), opcaoRetratil(b)]
     case 'imagem': return [...editorImagem(b), opcaoRetratil(b)]
     case 'galeria': return [...editorGaleria(b), opcaoRetratil(b)]
     case 'video': return [...editorVideo(b), opcaoRetratil(b)]
@@ -488,6 +488,7 @@ function corpoBloco (b) {
       h('div', { class: 'grade-campos' },
         campo('Legenda (opcional)', b, 'legenda'),
         campo('Link do Google Drive (opcional)', b, 'drive', { ph: 'https://drive.google.com/…' })),
+      opcaoRetratil(b),
     ]
     default:
       return [h('p', { class: 'dica' }, 'Tipo de bloco não editável aqui.')]
@@ -544,7 +545,7 @@ function opcaoRetratil (b) {
     if (b.retratil) {
       const aberta = h('input', { type: 'checkbox', onchange: (e) => { if (e.target.checked) b.aberta = true; else delete b.aberta; mudou() } })
       aberta.checked = !!b.aberta
-      const padrao = { imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo' }[b.tipo]
+      const padrao = { texto: 'Ver mais', citacao: 'Citação', imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo', pdf: 'Documento' }[b.tipo]
       partes.push(campo('Título da caixa', b, 'tituloRetratil', { ph: 'Ex.: ' + padrao + ' da aula — vazio usa “' + padrao + '”' }),
         h('label', { class: 'marcar' }, aberta, 'Começar aberto'))
     }
@@ -679,7 +680,10 @@ function normalizar (base) {
   for (const s of window.SECOES) {
     const d = (base.conteudo[s.id] = base.conteudo[s.id] || {})
     if (s.blocos) {
-      d.blocos = (d.blocos || []).filter(b => b && b.tipo && !(b.tipo === 'texto' && !String(b.texto || '').trim()))
+      d.blocos = (d.blocos || []).map(b => b && b.tipo === 'retratil'
+        ? { tipo: 'texto', texto: b.texto || '', retratil: true, ...(b.titulo ? { tituloRetratil: b.titulo } : {}), ...(b.aberta ? { aberta: true } : {}) }
+        : b)
+      d.blocos = d.blocos.filter(b => b && b.tipo && !(b.tipo === 'texto' && !String(b.texto || '').trim()))
     }
     if (s.documentos) d.documentos = d.documentos || []
     if (s.referencias) d.referencias = d.referencias || []

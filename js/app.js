@@ -75,15 +75,16 @@ const dados = (id) => {
 }
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
-// Foto, galeria e vídeo podem ficar dentro de uma caixa que abre e
-// fecha (opção "retrátil" no painel).
+// Qualquer bloco, menos o subtítulo, pode ficar dentro de uma caixa
+// que abre e fecha (opção "Deixar retrátil" no painel).
+const TITULO_RETRATIL = { texto: 'Ver mais', citacao: 'Citação', imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo', pdf: 'Documento' }
 function renderBloco (b) {
   const html = renderBlocoBase(b)
-  if (!html || !b.retratil || !['imagem', 'galeria', 'video'].includes(b.tipo)) return html
+  if (!html || !b.retratil || !TITULO_RETRATIL[b.tipo]) return html
   const n = b.tipo === 'galeria' ? (b.itens || []).filter(i => i.url).length : 1
-  const extra = b.tipo === 'video' ? (n === 1 ? '1 vídeo' : n + ' vídeos') : (n === 1 ? '1 foto' : n + ' fotos')
-  const padrao = { imagem: 'Foto', galeria: 'Fotos', video: 'Vídeo' }[b.tipo]
-  return dobra(b.tituloRetratil || padrao, html, extra, !!b.aberta)
+  const extra = b.tipo === 'galeria' || b.tipo === 'imagem' ? (n === 1 ? '1 foto' : n + ' fotos')
+    : b.tipo === 'video' ? '1 vídeo' : b.tipo === 'pdf' ? 'PDF' : ''
+  return dobra(b.tituloRetratil || TITULO_RETRATIL[b.tipo], html, extra, !!b.aberta)
 }
 
 function renderBlocoBase (b) {
