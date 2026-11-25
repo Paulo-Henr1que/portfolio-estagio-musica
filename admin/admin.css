@@ -248,3 +248,12 @@
   #conta-nome{ display:none; }
   #bt-conta{ padding:6px; }
 }
+
+/* escolha do tamanho da foto */
+.tamanhos{ display:flex; flex-wrap:wrap; gap:6px; }
+.tamanhos button{ font:inherit; font-size:13.5px; font-weight:600; color:var(--escuro); background:var(--branco);
+  border:1px solid var(--borda); border-radius:9px; padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+.tamanhos button:hover{ background:var(--pastel); }
+.tamanhos button[aria-pressed="true"]{ background:var(--escuro); border-color:var(--escuro); color:#fff; }
+.tam-ic{ display:inline-block; height:12px; border-radius:2px; background:currentColor; opacity:.55; }
+.tam-ic-pequena{ width:8px; } .tam-ic-media{ width:13px; } .tam-ic-grande{ width:18px; } .tam-ic-total{ width:24px; }

@@ -625,3 +625,13 @@ h3.sub.fig-4::before{ background-image:url("data:image/svg+xml,%3Csvg xmlns='htt
 .pdf-bloco .pl-links{ display:flex; gap:8px 18px; justify-content:flex-end; flex-wrap:wrap; }
 /* pré-visualização do painel: sem o botão flutuante */
 .previa .topo-flut{ display:none !important; }
+
+/* ── Tamanho das fotos (escolhido no painel) ───────────────────── */
+figure.foto{ margin-left:auto; margin-right:auto; }
+figure.foto.tam-pequena{ max-width:min(340px, 60%); }
+figure.foto.tam-media{ max-width:min(540px, 80%); }
+figure.foto.tam-grande{ max-width:min(760px, 100%); }
+@media (max-width:560px){
+  figure.foto.tam-pequena{ max-width:65%; }
+  figure.foto.tam-media{ max-width:85%; }
+}

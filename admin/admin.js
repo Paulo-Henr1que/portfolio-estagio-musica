@@ -409,8 +409,23 @@ function editorImagem (b) {
   pintar()
   return [h('div', { class: 'midia-linha' }, vista, h('div', { class: 'midia-campos' },
     botaoEnviar(b.url ? 'Trocar foto' : 'Enviar foto', 'image/*', (url) => { b.url = url; mudou(); pintar() }),
+    escolhaTamanho(b),
     campo('Legenda', b, 'legenda'),
     campo('Descrição para leitores de tela (opcional)', b, 'alt', { ph: 'O que aparece na foto' })))]
+}
+
+// Tamanho da foto na página. A miniatura do lado não muda; use a
+// pré-visualização para ver como fica no site.
+const TAMANHOS = [['pequena', 'Pequena'], ['media', 'Média'], ['grande', 'Grande'], ['total', 'Largura total']]
+function escolhaTamanho (b) {
+  const atual = () => b.tamanho || 'total'
+  const grupo = h('div', { class: 'tamanhos', role: 'group', 'aria-label': 'Tamanho da foto' })
+  const pintar = () => grupo.replaceChildren(...TAMANHOS.map(([v, rot]) => h('button', {
+    type: 'button', 'aria-pressed': String(atual() === v),
+    onclick: () => { if (v === 'total') delete b.tamanho; else b.tamanho = v; mudou(); pintar() },
+  }, h('span', { class: 'tam-ic tam-ic-' + v }), rot)))
+  pintar()
+  return h('div', { class: 'cx' }, 'Tamanho na página', grupo)
 }
 
 function editorVideo (b) {

@@ -79,7 +79,8 @@ function renderBloco (b) {
       return b.texto ? `<blockquote>${esc(b.texto).replace(/\n/g, '<br>')}</blockquote>` : ''
     case 'imagem':
       if (!b.url) return ''
-      return `<figure><img src="${esc(b.url)}" alt="${esc(b.alt || b.legenda || '')}"
+      // tamanho escolhido no painel: pequena, media, grande ou total (padrão)
+      return `<figure class="foto tam-${['pequena','media','grande'].includes(b.tamanho) ? b.tamanho : 'total'}"><img src="${esc(b.url)}" alt="${esc(b.alt || b.legenda || '')}"
               loading="lazy" data-lupa="imagem">${leg}</figure>`
     case 'galeria': {
       const itens = (b.itens || []).filter(i => i.url)
