@@ -53,6 +53,7 @@ const ICONES = {
   lixo: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
   mais: '<path d="M12 5v14M5 12h14"/>',
   subir: '<path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/>',
 }
 const ic = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`
 const icBt = (n, rotulo, aoClicar, extra = {}) =>
@@ -415,12 +416,12 @@ function mover (lista, i, d) {
 
 // ── Blocos de conteúdo ─────────────────────────────────────────────
 const TIPOS = [
-  ['texto', 'Parágrafo'], ['subtitulo', 'Subtítulo'], ['citacao', 'Citação'],
+  ['texto', 'Parágrafo'], ['retratil', 'Texto retrátil'], ['subtitulo', 'Subtítulo'], ['citacao', 'Citação'],
   ['imagem', 'Foto'], ['galeria', 'Galeria de fotos'], ['video', 'Vídeo'], ['pdf', 'Documento PDF'],
 ]
 const nomeTipo = (t) => (TIPOS.find(x => x[0] === t) || [t, t])[1]
 const novoBloco = (t) => ({
-  texto: { tipo: 'texto', texto: '' }, subtitulo: { tipo: 'subtitulo', texto: '' }, citacao: { tipo: 'citacao', texto: '' },
+  texto: { tipo: 'texto', texto: '' }, retratil: { tipo: 'retratil', titulo: '', texto: '' }, subtitulo: { tipo: 'subtitulo', texto: '' }, citacao: { tipo: 'citacao', texto: '' },
   imagem: { tipo: 'imagem', url: '', legenda: '', alt: '' }, galeria: { tipo: 'galeria', legenda: '', itens: [] },
   video: { tipo: 'video', url: '', poster: '', drive: '', legenda: '' }, pdf: { tipo: 'pdf', url: '', drive: '', legenda: '' },
 }[t])
@@ -465,7 +466,16 @@ function editorBlocos (d, { titulo, dica }) {
 function corpoBloco (b) {
   switch (b.tipo) {
     case 'texto':
-      return [campo('', b, 'texto', { area: true, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' })]
+      return [comLink(campo('', b, 'texto', { area: true, dica: 'Deixe uma linha em branco entre um parágrafo e outro.' }), b, 'texto')]
+    case 'retratil': {
+      const aberta = h('input', { type: 'checkbox', onchange: (e) => { if (e.target.checked) b.aberta = true; else delete b.aberta; mudou() } })
+      aberta.checked = !!b.aberta
+      return [
+        campo('Título (aparece na caixa fechada)', b, 'titulo', { ph: 'Ex.: Turma 5º A' }),
+        comLink(campo('Texto', b, 'texto', { area: true, dica: 'Fica escondido até a pessoa clicar no título. Linha em branco separa os parágrafos.' }), b, 'texto'),
+        h('label', { class: 'marcar' }, aberta, 'Começar aberto'),
+      ]
+    }
     case 'subtitulo':
       return [campo('', b, 'texto', { ph: 'Ex.: Turma 5º A' })]
     case 'citacao':
@@ -482,6 +492,42 @@ function corpoBloco (b) {
     default:
       return [h('p', { class: 'dica' }, 'Tipo de bloco não editável aqui.')]
   }
+}
+
+// Botão "Link": transforma o trecho selecionado em link. No texto fica
+// [trecho](https://endereço), e o site mostra só o trecho, clicável.
+function comLink (rotulo, obj, chave) {
+  const area = rotulo.querySelector('textarea')
+  const form = h('div', { class: 'link-form', hidden: true })
+  const url = h('input', { type: 'url', placeholder: 'https://…', 'aria-label': 'Endereço do link' })
+  const txt = h('input', { placeholder: 'Texto que aparece (opcional)', 'aria-label': 'Texto do link' })
+  let sel = [0, 0]
+  const aplicar = () => {
+    let u = url.value.trim()
+    if (!u) { url.focus(); return }
+    if (!/^https?:\/\//i.test(u)) u = 'https://' + u
+    const v = area.value
+    const trecho = txt.value.trim() || v.slice(sel[0], sel[1]).trim()
+    const novo = trecho ? `[${trecho.replace(/[\[\]]/g, '')}](${u})` : u
+    area.value = v.slice(0, sel[0]) + novo + v.slice(sel[1])
+    obj[chave] = area.value; mudou()
+    area.dispatchEvent(new Event('input'))
+    form.hidden = true
+    area.focus(); area.setSelectionRange(sel[0] + novo.length, sel[0] + novo.length)
+  }
+  url.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); aplicar() } })
+  txt.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); aplicar() } })
+  form.append(url, txt,
+    h('button', { type: 'button', class: 'bt pequeno', onclick: aplicar }, 'Inserir'),
+    h('button', { type: 'button', class: 'bt leve pequeno', onclick: () => { form.hidden = true } }, 'Cancelar'))
+  const bt = h('button', { type: 'button', class: 'chip', html: ic('link') + ' Link', onclick: () => {
+    sel = [area.selectionStart, area.selectionEnd]
+    txt.value = ''; url.value = ''
+    txt.placeholder = sel[1] > sel[0] ? 'Texto: “' + area.value.slice(sel[0], sel[1]).slice(0, 40) + '”' : 'Texto que aparece (opcional)'
+    form.hidden = false; url.focus()
+  } })
+  return h('div', { class: 'com-link' }, rotulo,
+    h('div', { class: 'link-barra' }, bt, h('span', { class: 'envio-txt' }, 'Selecione um trecho do texto e clique em Link.')), form)
 }
 
 function editorImagem (b) {

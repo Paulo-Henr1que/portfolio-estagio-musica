@@ -11,9 +11,17 @@ const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
 // Quebra o texto digitado em parágrafos, preservando as linhas em branco.
+// Links no meio do texto: [texto do link](https://endereço) ou o
+// endereço solto (https://…). Abrem em outra aba.
+const linkar = (html) => html
+  .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    (_, txt, url) => `<a href="${url}" target="_blank" rel="noopener">${txt}</a>`)
+  .replace(/(^|[\s(])(https?:\/\/[^\s<]*[^\s<.,;:!?)])/g,
+    (_, antes, url) => `${antes}<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
+
 const paragrafos = (t) => String(t || '').split(/\n{2,}/)
   .filter(p => p.trim())
-  .map(p => '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>').join('')
+  .map(p => '<p>' + linkar(esc(p.trim())).replace(/\n/g, '<br>') + '</p>').join('')
 
 const vazio = (v) => v === undefined || v === null || String(v).trim() === ''
 
@@ -75,6 +83,10 @@ function renderBloco (b) {
       return b.texto ? `<h3 class="sub">${esc(b.texto)}</h3>` : ''
     case 'texto':
       return paragrafos(b.texto)
+    case 'retratil':
+      // texto que abre e fecha, com título (como "Turma 5º A")
+      if (vazio(b.texto)) return ''
+      return dobra(b.titulo || 'Ver mais', paragrafos(b.texto), '', !!b.aberta)
     case 'citacao':
       return b.texto ? `<blockquote>${esc(b.texto).replace(/\n/g, '<br>')}</blockquote>` : ''
     case 'imagem':

@@ -635,3 +635,8 @@ figure.foto.tam-grande{ max-width:min(760px, 100%); }
   figure.foto.tam-pequena{ max-width:65%; }
   figure.foto.tam-media{ max-width:85%; }
 }
+
+/* links escritos no meio do texto (pelo painel) */
+.corpo p a, .dobra-corpo p a{ color:var(--medio-f); text-decoration:underline; text-decoration-thickness:1px;
+  text-underline-offset:3px; overflow-wrap:anywhere; }
+.corpo p a:hover, .dobra-corpo p a:hover{ color:var(--escuro); }

@@ -269,3 +269,12 @@
 .nova-sub input:focus, .sub-linha .cx input:focus{ outline:none; border-color:var(--medio); box-shadow:0 0 0 3px rgba(110,145,102,.18); }
 .sub-item{ align-items:center; }
 .sub-item .acoes-item{ flex-direction:row; }
+
+/* links no texto e texto retrátil */
+.com-link{ display:flex; flex-direction:column; gap:8px; }
+.link-barra{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.link-form{ display:flex; gap:8px; flex-wrap:wrap; background:var(--creme); border:1px solid var(--borda); border-radius:10px; padding:10px; }
+.link-form input{ flex:1; min-width:180px; font:inherit; font-size:14.5px; border:1px solid var(--borda); border-radius:8px; padding:8px 10px; background:var(--branco); }
+.link-form input:focus{ outline:none; border-color:var(--medio); }
+.marcar{ display:inline-flex; align-items:center; gap:8px; font-size:14px; color:var(--tinta); cursor:pointer; }
+.marcar input{ width:17px; height:17px; accent-color:var(--medio-f); }
